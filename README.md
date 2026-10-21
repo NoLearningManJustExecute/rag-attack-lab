@@ -92,6 +92,26 @@ The tests run fully offline. They use a fake chat model and a deterministic bag-
 python -m pytest
 ```
 
+## Known dependency advisories
+
+`chromadb` 1.5.9, the latest release, has four open advisories with no patched version yet. They are real upstream issues, not one of this lab's deliberate weaknesses.
+
+| CVE | GHSA | Severity | Issue |
+| --- | --- | --- | --- |
+| CVE-2026-45829 | GHSA-f4j7-r4q5-qw2c | Critical | Unauthenticated code execution via `trust_remote_code` on the create-collection endpoint |
+| CVE-2026-45833 | GHSA-36p7-vc44-83pf | Critical | Authenticated code execution via `trust_remote_code` on the update-collection endpoint |
+| CVE-2026-45830 | GHSA-2wm9-hf6c-p5cr | High | Any authenticated user can read or change any tenant's collections |
+| CVE-2026-45831 | GHSA-xph7-9rjv-w5fr | High | `SimpleRBACAuthorizationProvider` ignores tenant, database, and collection scope |
+
+**Affected component:** the Chroma HTTP server (its `/api/v2` endpoints and auth providers).
+
+**Why this lab is not exposed:**
+
+- `vectorstore.py` opens Chroma with `persist_directory`, which uses `chromadb.PersistentClient`. It runs in-process and stores data in `CHROMA_DIR`. No server is started and no port is opened.
+- The lab never sets `trust_remote_code` and does not use Chroma's built-in embedding functions. Embeddings come from Ollama (or the fake provider) through LangChain.
+
+**Rule:** never run `chroma run` or any Chroma server in this project. The pin stays at 1.5.9 until a patched release ships. Then bump it and remove this section.
+
 ## Project layout
 
 ```
