@@ -6,6 +6,8 @@
 
 **Status: v0.1 baseline.** This version is a clean, working RAG pipeline with no planted vulnerabilities. Vulnerabilities and attack exercises land in v1.0.
 
+See [ROADMAP.md](ROADMAP.md) for project phases.
+
 ## What it does
 
 1. **Ingest:** loads `.txt` and `.pdf` files, splits them into chunks, embeds them with `nomic-embed-text` via Ollama, and stores them in a local Chroma database.
