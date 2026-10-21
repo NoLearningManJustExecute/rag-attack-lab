@@ -27,6 +27,9 @@ These apply to every commit and PR, in every session.
   and read in `src/rag_attack_lab/config.py`.
 - Any fake secret added to this repo must use an obviously fake marker format (for example `RAL-CANARY-...`),
   never a realistic provider key format. Realistic formats get blocked by GitHub push protection.
+- Never run `chroma run` or start any Chroma server in this project. The lab uses `chromadb.PersistentClient`
+  in-process only, because chromadb 1.5.9 has unpatched server-side advisories. See "Known dependency advisories"
+  in `README.md`.
 
 ## Layout
 
