@@ -1,0 +1,36 @@
+# RAG Attack Lab
+
+A deliberately vulnerable RAG app for AI security education (same category as DVWA/WebGoat).
+Local only. Fake data only.
+
+## Hard rules
+
+These apply to every commit and PR, in every session.
+
+- Every commit message ends with exactly this trailer and nothing else:
+  `Co-authored-by: Coder Assistant` (no email address)
+- Never use any anthropic.com email address anywhere in this repo: commits, trailers, code, comments, or docs.
+- Never include session IDs, session URLs, claude.ai links, "Generated with Claude Code", or any tool-generated
+  footer in commits, PR descriptions, code comments, or docs.
+- `.claude/settings.json` enforces the attribution above (`attribution.commit` is the trailer, `attribution.pr`
+  is empty, `attribution.sessionUrl` is false). Do not change it.
+- Before every push: run `git log -1 --format=%B`, show the full message to the user, and wait for their OK.
+  Never push without it.
+- Never force push. The `main` branch ruleset blocks force pushes and deletions, so pushed commits are permanent.
+
+## Project rules
+
+- Verify, don't assume. Check current package versions with pip before pinning. Check library APIs against the
+  installed version before using them. If something doesn't work as expected, say so and stop. Don't paper over it.
+- Readability over cleverness. This is a teaching tool.
+- Never hardcode models, paths, or keys. Everything comes from env vars, with defaults documented in `.env.example`
+  and read in `src/rag_attack_lab/config.py`.
+- Any fake secret added to this repo must use an obviously fake marker format (for example `RAL-CANARY-...`),
+  never a realistic provider key format. Realistic formats get blocked by GitHub push protection.
+
+## Layout
+
+- `src/rag_attack_lab/`: config, providers, embeddings, ingest, vectorstore, retriever, rag, cli
+- `data/`: seed documents (fake company content)
+- `tests/`: offline tests using the fake chat provider and fake embeddings
+- Run tests: `.venv\Scripts\python.exe -m pytest`

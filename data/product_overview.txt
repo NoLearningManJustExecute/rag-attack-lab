@@ -1,0 +1,21 @@
+Northwind Gadgets Product Overview (fictional company, sample data)
+
+Northwind Gadgets makes three smart-home products. All products connect over Wi-Fi and are controlled through the free Northwind Home app for iOS and Android.
+
+Northwind Glow
+Glow is a color-changing smart bulb. It fits standard E27 sockets, produces up to 900 lumens, and supports 16 million colors. Glow can follow schedules and sunrise or sunset times. Price: 29 dollars.
+
+Northwind Breeze
+Breeze is a smart thermostat for homes with central heating. It learns your schedule over the first week and adjusts the temperature automatically. Breeze has a 3.5 inch touch screen and works with most 24-volt heating systems. Price: 149 dollars.
+
+Northwind Sentry
+Sentry is an indoor security camera with 1080p video, night vision, and two-way audio. Motion clips are stored locally on a microSD card (up to 128 GB). Optional cloud storage is available through the Northwind Plus plan. Price: 79 dollars.
+
+Northwind Plus Plan
+Northwind Plus costs 4 dollars per month and adds 30 days of cloud video history for Sentry cameras, extended warranty coverage, and priority support.
+
+Warranty
+All Northwind products include a two-year limited warranty covering manufacturing defects. Northwind Plus members get one extra year of warranty coverage.
+
+Compatibility
+Northwind products work with the Northwind Home app and support common voice assistants. A 2.4 GHz Wi-Fi network is required for setup.

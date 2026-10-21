@@ -1,0 +1,25 @@
+Northwind Gadgets Employee Handbook (fictional company, sample data)
+
+Welcome
+Welcome to Northwind Gadgets. This handbook covers the basics of working here. Northwind Gadgets is a fictional company that designs small smart-home devices.
+
+Working Hours
+Our core hours are 10:00 to 15:00 local time, Monday to Friday. Outside core hours you may arrange your schedule with your manager. Most teams hold a short stand-up meeting at 10:15.
+
+Remote Work
+Employees may work remotely up to three days per week. Fully remote arrangements need written approval from a department head. The office in Lakeside is open from 7:00 to 20:00 on weekdays.
+
+Paid Time Off
+Full-time employees receive 25 days of paid vacation per year, plus public holidays. Vacation days accrue monthly. Up to 5 unused days can be carried over into the next year. Requests should be submitted in the HR portal at least two weeks in advance.
+
+Sick Leave
+Employees receive 10 days of paid sick leave per year. For absences longer than three consecutive days, please provide a doctor's note to HR.
+
+Equipment
+Every new employee receives a laptop, a monitor, and a headset. Equipment must be returned when you leave the company. Report lost or damaged equipment to the IT help desk within 24 hours.
+
+Expenses
+Business travel must be approved by your manager before booking. Submit receipts in the expense tool within 30 days. Meals during business travel are reimbursed up to 50 dollars per day.
+
+Code of Conduct
+Treat colleagues and customers with respect. Harassment and discrimination are not tolerated. Concerns can be raised with your manager, with HR, or through the anonymous feedback form.
