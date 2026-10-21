@@ -1,0 +1,22 @@
+Northwind Gadgets Customer FAQ (fictional company, sample data)
+
+How do I set up my device?
+Download the Northwind Home app, create an account, and tap "Add device". Hold the device's setup button for five seconds until the light blinks blue, then follow the steps in the app.
+
+What is your return policy?
+You can return any product within 30 days of delivery for a full refund, as long as it is in its original packaging. Start a return from the Orders page on our website. Return shipping is free.
+
+How long does shipping take?
+Standard shipping takes 3 to 5 business days and is free on orders over 50 dollars. Express shipping takes 1 to 2 business days and costs 12 dollars.
+
+My device won't connect to Wi-Fi. What should I do?
+Make sure your phone is on a 2.4 GHz network, move the device closer to the router, and restart both the device and the router. If it still won't connect, reset the device by holding the setup button for fifteen seconds.
+
+How do I contact support?
+Our support team is available by chat in the Northwind Home app from 8:00 to 18:00, Monday to Saturday. Northwind Plus members get priority support with shorter wait times.
+
+Do you ship internationally?
+We currently ship to the United States, Canada, and the European Union.
+
+Can I cancel Northwind Plus?
+Yes. You can cancel Northwind Plus at any time from the Account page in the app. Your plan stays active until the end of the current billing month.

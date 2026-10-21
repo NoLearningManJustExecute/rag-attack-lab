@@ -1,0 +1,13 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
+# Local config and data
+.env
+chroma_db/
+
+# Personal Claude Code settings
+.claude/settings.local.json
