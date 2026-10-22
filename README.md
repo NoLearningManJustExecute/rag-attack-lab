@@ -25,6 +25,13 @@ The seed documents in `data/` describe a fictional company, Northwind Gadgets: a
 
 ## Architecture
 
+![Architecture of the RAG pipeline with the four planted weaknesses pinned where they occur](docs/images/architecture.png)
+
+`SECURE_MODE=true` closes LLM02/LLM09 structurally (ingest labels + retrieval filter) and mitigates LLM01/LLM08 (prompt fencing, separate system role, output checks).
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart TD
     subgraph ingest[Ingest]
@@ -52,7 +59,7 @@ flowchart TD
     class W01,W02,W08,W09 weakness;
 ```
 
-`SECURE_MODE=true` closes LLM02/LLM09 structurally (ingest labels + retrieval filter) and mitigates LLM01/LLM08 (prompt fencing, separate system role, output checks).
+</details>
 
 ## Deliberately planted vulnerabilities
 
