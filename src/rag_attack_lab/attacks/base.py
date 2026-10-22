@@ -37,6 +37,15 @@ class AttackCase:
     detector: Detector
 
 
+@dataclass(frozen=True)
+class BenignCase:
+    """An ordinary question with a known answer, to measure what the fixes cost normal users."""
+
+    id: str
+    question: str
+    expected: tuple[str, ...]  # the answer is correct if it contains any of these (case-insensitive)
+
+
 @dataclass
 class Finding:
     """The result of running one case: the case, the detection, and the captured evidence."""
