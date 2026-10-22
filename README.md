@@ -70,6 +70,9 @@ The Anthropic provider is optional. It only needs `langchain-anthropic` (include
 ## Usage
 
 ```powershell
+# Check the setup: providers, Ollama and its models, and the vector store
+rag-lab doctor
+
 # Ingest the seed documents (or pass a file or folder)
 rag-lab ingest
 rag-lab ingest path\to\folder
@@ -85,6 +88,8 @@ rag-lab reset
 ```
 
 `python -m rag_attack_lab.cli <command>` works too. Running `ingest` again on the same files overwrites their chunks instead of adding duplicates. If you edit or remove a file, run `reset` and then `ingest` so its old chunks are dropped.
+
+`doctor` prints the active settings, then PASS, FAIL, or SKIP for each check, and exits with a non-zero code if any check fails. It only contacts Ollama when `LLM_PROVIDER` or `EMBEDDING_PROVIDER` is `ollama`.
 
 ## Tests
 
