@@ -1,9 +1,24 @@
 name: CI
 
+# Doc-only changes skip CI to save Actions minutes. This is safe because the main
+# ruleset has no required status checks. If one is added, a doc-only pull request
+# would wait forever for a check that never runs.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".editorconfig"
+      - ".gitignore"
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".editorconfig"
+      - ".gitignore"
   workflow_dispatch:
 
 # Least privilege: jobs can read the repo and nothing else.
