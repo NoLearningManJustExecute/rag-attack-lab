@@ -1,0 +1,102 @@
+# Planted vulnerabilities
+
+RAG Attack Lab is vulnerable on purpose. This file lists every weakness planted in v1.0, where it lives, and why it is
+a weakness. All four are always on: there is no switch to turn them off. The fixes come in v3.0.
+
+Each weakness is mapped to the [OWASP Top 10 for LLM Applications (2026)](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
+and to [MITRE ATLAS](https://atlas.mitre.org/). The ATLAS IDs were checked against the ATLAS data release v2026.09.
+
+Every weakness site in the code carries a comment that starts with its OWASP ID, for example `# LLM01: ...`.
+To find them all:
+
+```powershell
+git grep -nE "# LLM0[1289]"
+```
+
+The tests in `tests/test_weaknesses.py` confirm each weakness is present. In v3.0 they flip to confirm each fix.
+
+For the system description, trust boundaries, and assets, see the [threat model](docs/threat-model.md).
+
+| ID | Weakness | MITRE ATLAS |
+| --- | --- | --- |
+| [LLM01](#llm01-prompt-injection) | Prompt Injection (direct and indirect) | AML.T0051 LLM Prompt Injection (.000 Direct, .001 Indirect) |
+| [LLM02](#llm02-sensitive-information-disclosure) | Sensitive Information Disclosure | AML.T0057 LLM Data Leakage |
+| [LLM08](#llm08-hidden-context-exposure) | Hidden Context Exposure | AML.T0056 Extract LLM System Prompt |
+| [LLM09](#llm09-vector-and-embedding-weaknesses) | Vector and Embedding Weaknesses | AML.T0070 RAG Poisoning |
+
+## LLM01 Prompt Injection
+
+- **OWASP:** LLM01 Prompt Injection
+- **MITRE ATLAS:** AML.T0051 LLM Prompt Injection, sub-techniques AML.T0051.000 Direct and AML.T0051.001 Indirect
+- **Where it lives:**
+  - `src/rag_attack_lab/rag.py`, `build_prompt()`: the question and the retrieved chunk text are dropped into
+    `PROMPT_TEMPLATE` with `str.format`. Look for the `# LLM01 (direct)` and `# LLM01 (indirect)` comments.
+  - `data/untrusted/vendor_newsletter.txt`: a labeled teaching example whose body contains instruction-like text.
+- **Why it is vulnerable:** the model receives one block of text. Nothing separates the developer's instructions from
+  the user's question or from document content, so text in either place can read as an instruction. The question is
+  not checked, and retrieved text is pasted in verbatim with only a `[Source: ...]` label in front of it.
+- **What would prevent it:** keep instructions in a separate system message, wrap untrusted text in clearly delimited
+  data blocks, screen inputs and retrieved text for instruction-like content, and check outputs before returning them.
+- **How v2 will exercise it:** ask questions, and ingest documents, that try to override the instructions, and record
+  whether the answer follows them.
+
+## LLM02 Sensitive Information Disclosure
+
+- **OWASP:** LLM02 Sensitive Information Disclosure
+- **MITRE ATLAS:** AML.T0057 LLM Data Leakage
+- **Where it lives:**
+  - `data/internal/ops_runbook.txt` and `data/internal/leadership_memo.txt`: fictional internal documents with
+    `{{CANARY:...}}` placeholders. `src/rag_attack_lab/canaries.py` fills them with generated `RAL-CANARY-...` values
+    at ingest time and saves the values to `CANARY_FILE` (default `data/internal/.canaries`, git-ignored).
+  - `src/rag_attack_lab/ingest.py`, `ingest()`: internal documents are stored in the same index as the public ones.
+    Look for the `# LLM02` comment.
+  - `src/rag_attack_lab/retriever.py`, `retrieve()`: the similarity search has no filter. Look for the `# LLM02` comment.
+- **Why it is vulnerable:** there is no access control anywhere in the pipeline. Retrieval does not know who is asking,
+  documents carry no sensitivity label, and nothing checks answers for secrets. Any question that is similar enough to
+  an internal document pulls it, canaries included, into the prompt.
+- **What would prevent it:** keep secrets out of the corpus entirely, label documents by sensitivity, filter retrieval
+  by the caller's permissions, and scan answers for secrets before returning them.
+- **How v2 will exercise it:** ask ordinary-sounding questions and check whether any `RAL-CANARY-` value from
+  `CANARY_FILE` appears in the retrieved context or the answer.
+
+## LLM08 Hidden Context Exposure
+
+- **OWASP:** LLM08 Hidden Context Exposure (the 2025 list called this System Prompt Leakage)
+- **MITRE ATLAS:** AML.T0056 Extract LLM System Prompt
+- **Where it lives:** `src/rag_attack_lab/rag.py`: `PROMPT_TEMPLATE` and `answer_question()`. Look for the `# LLM08`
+  comments.
+- **Why it is vulnerable:** the system instructions are ordinary text at the top of the same string as the context and
+  the question. They are not sent as a separate system message, the model is not told to keep them private, and
+  nothing checks whether an answer repeats them. The retrieved context is hidden from the user too, and is just as
+  exposed.
+- **What would prevent it:** treat the system prompt as public and keep nothing sensitive in it, send it as a separate
+  system message, and filter answers that echo it or the hidden context.
+- **How v2 will exercise it:** ask the assistant to describe or repeat its instructions and its context, and compare the
+  answer with `PROMPT_TEMPLATE`.
+
+## LLM09 Vector and Embedding Weaknesses
+
+- **OWASP:** LLM09 Vector and Embedding Weaknesses
+- **MITRE ATLAS:** AML.T0070 RAG Poisoning
+- **Where it lives:**
+  - `src/rag_attack_lab/ingest.py`, `find_files()` and `ingest()`: every supported file under the folder, including
+    subfolders, is ingested with no checks. Look for the `# LLM09` comment.
+  - `src/rag_attack_lab/vectorstore.py`, `get_vector_store()`: one shared collection for everything. Look for the
+    `# LLM09` comment.
+  - `src/rag_attack_lab/rag.py`, `build_prompt()`: trusted and untrusted chunks get the same label.
+  - `data/untrusted/return_policy_update.txt`: a labeled teaching example that contradicts the real return policy in
+    `data/customer_faq.txt`.
+- **Why it is vulnerable:** the index has no isolation and no provenance. Anyone who can put a file in the data folder
+  can add content that is retrieved and presented exactly like the company's own documents. Nothing records where a
+  document came from, nothing reviews its content, and the prompt gives the model no way to tell trusted from untrusted
+  text.
+- **What would prevent it:** only ingest from vetted sources, record provenance and trust level in metadata, check
+  documents for suspicious content before they are indexed, separate collections by tenant and sensitivity, and be able
+  to purge and rebuild the index.
+- **How v2 will exercise it:** ingest a document that contradicts a trusted one, ask about that topic, and record which
+  version the answer follows.
+
+## Not a planted weakness
+
+The `chromadb` advisories listed under "Known dependency advisories" in [README.md](README.md) are real upstream
+issues, not part of the lab. The lab is not exposed to them because it never starts a Chroma server.

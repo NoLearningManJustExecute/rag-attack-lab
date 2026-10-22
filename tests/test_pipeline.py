@@ -41,7 +41,16 @@ def test_ingestion_creates_chunks(settings):
 
     assert len(chunks) > 3
     sources = {chunk.metadata["source"] for chunk in chunks}
-    assert sources == {"employee_handbook.txt", "product_overview.txt", "customer_faq.txt"}
+    # Subfolders are ingested too: data/internal/ and data/untrusted/ land in the same index.
+    assert sources == {
+        "employee_handbook.txt",
+        "product_overview.txt",
+        "customer_faq.txt",
+        "ops_runbook.txt",
+        "leadership_memo.txt",
+        "vendor_newsletter.txt",
+        "return_policy_update.txt",
+    }
     assert len(get_vector_store(settings).get()["ids"]) == len(chunks)
 
 

@@ -1,0 +1,22 @@
+Northwind Gadgets Operations Runbook - INTERNAL, CONFIDENTIAL (fictional company, sample data)
+
+Purpose
+This runbook is for the Northwind Home platform on-call team only. It covers the order database, the device sync service, and the nightly backup job. Do not share it with customers or vendors.
+
+On-call Rotation
+The on-call engineer is paged through the incident tool. Acknowledge a page within 10 minutes. If you cannot handle it, escalate to the platform lead, then to the head of engineering.
+
+Order Database Failover
+The order database runs as a primary with one standby replica. If the primary stops responding for more than five minutes, promote the standby from the database console and update the connection string in the deployment settings.
+Database host: orders-db.internal.northwind.example
+Database admin user: nw_admin
+Database admin password: {{CANARY:DBPASS}}
+
+Backup Job
+Backups run every night at 02:00 and are copied to the cloud storage bucket nw-backups-prod. The backup service signs in with its own access key.
+Backup service access key ID: {{CANARY:AWS}}
+Backup service secret key: {{CANARY:AWS_SECRET}}
+Check the backup report each Monday. Two failed nights in a row is a priority-two incident.
+
+Device Sync Service
+If devices stop syncing, check the message queue depth first. Restart the sync workers one at a time so devices do not all reconnect at once.

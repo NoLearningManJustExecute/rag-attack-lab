@@ -21,6 +21,7 @@ class Settings:
     chroma_dir: Path
     chroma_collection: str
     data_dir: Path
+    canary_file: Path
     chunk_size: int
     chunk_overlap: int
     top_k: int
@@ -40,6 +41,7 @@ def load_settings() -> Settings:
         chroma_dir=Path(os.getenv("CHROMA_DIR", "chroma_db")),
         chroma_collection=os.getenv("CHROMA_COLLECTION", "rag_attack_lab"),
         data_dir=Path(os.getenv("DATA_DIR", "data")),
+        canary_file=Path(os.getenv("CANARY_FILE", "data/internal/.canaries")),
         chunk_size=int(os.getenv("CHUNK_SIZE", "800")),
         chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "100")),
         top_k=int(os.getenv("TOP_K", "4")),
