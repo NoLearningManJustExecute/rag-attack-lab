@@ -1,0 +1,25 @@
+name: Task
+description: A planned piece of work on the roadmap.
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: One sentence on what this task delivers.
+    validations:
+      required: true
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+      description: The checks that prove the task is finished.
+      placeholder: |
+        - [ ] Tests pass
+        - [ ] Docs updated
+    validations:
+      required: true
+  - type: input
+    id: framework
+    attributes:
+      label: Framework mapping
+      description: OWASP LLM Top 10 (2026) and MITRE ATLAS IDs, if any.
