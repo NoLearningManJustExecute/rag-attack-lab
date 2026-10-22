@@ -1,6 +1,6 @@
 # RAG Attack Lab
 
-> **Vulnerable by design.** This is a deliberately insecure RAG application for AI security education, in the same spirit as DVWA and WebGoat.
+> **Vulnerable by design.** This is a deliberately insecure RAG application for AI security education, in the same spirit as other intentionally vulnerable training applications.
 > **Local only.** Run it on your own machine. Never deploy it or expose it to a network.
 > **Fake data only.** Every document in this repo is invented. Never load real or sensitive data into it.
 
