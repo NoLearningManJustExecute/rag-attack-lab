@@ -4,7 +4,7 @@
 > **Local only.** Run it on your own machine. Never deploy it or expose it to a network.
 > **Fake data only.** Every document in this repo is invented. Never load real or sensitive data into it.
 
-**Status: v0.1 baseline.** This version is a clean, working RAG pipeline with no planted vulnerabilities. Vulnerabilities and attack exercises land in v1.0.
+**Status: v1.0 vulnerable target (in progress).** The RAG pipeline now has four deliberately planted, documented weaknesses. Attack exercises land in v2.0 and fixes in v3.0.
 
 See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP.md](ROADMAP.md) for project phases, [CONTRIBUTING.md](CONTRIBUTING.md) to get set up, and [SECURITY.md](SECURITY.md) for the security policy.
 
@@ -15,7 +15,20 @@ See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP
 1. **Ingest:** loads `.txt` and `.pdf` files, splits them into chunks, embeds them with `nomic-embed-text` via Ollama, and stores them in a local Chroma database.
 2. **Ask:** embeds your question, retrieves the top-k most similar chunks (with their source files), puts them into a prompt, and asks a local model (`llama3.1:8b` via Ollama by default) to answer.
 
-The seed documents in `data/` describe a fictional company, Northwind Gadgets: an employee handbook, a product overview, and a customer FAQ.
+The seed documents in `data/` describe a fictional company, Northwind Gadgets: an employee handbook, a product overview, and a customer FAQ. `data/internal/` holds fictional internal documents with canary secrets, and `data/untrusted/` holds two labeled teaching examples. All of them go into the same index.
+
+## Deliberately planted vulnerabilities
+
+Four weaknesses are planted on purpose and are always on. Each is mapped to the OWASP Top 10 for LLM Applications (2026) and MITRE ATLAS, and tagged in the code with a `# LLM0x:` comment.
+
+- **LLM01 Prompt Injection** (ATLAS AML.T0051, .000 Direct and .001 Indirect): the question and retrieved document text are pasted into the prompt with no separation of instructions from data.
+- **LLM02 Sensitive Information Disclosure** (ATLAS AML.T0057 LLM Data Leakage): internal documents with canary secrets share the index with public ones, and retrieval has no access control.
+- **LLM08 Hidden Context Exposure** (ATLAS AML.T0056 Extract LLM System Prompt): the system instructions are plain text in the same prompt string, with nothing to stop them being repeated.
+- **LLM09 Vector and Embedding Weaknesses** (ATLAS AML.T0070 RAG Poisoning): one shared index with no isolation or provenance, and untrusted documents are ingested and presented like trusted ones.
+
+Details, code locations, and what would prevent each one are in [VULNERABILITIES.md](VULNERABILITIES.md). The trust boundaries and assets are in the [threat model](docs/threat-model.md).
+
+Canary values are generated on your machine at ingest time in an obviously fake `RAL-CANARY-...` format and saved to `CANARY_FILE`, which is git-ignored. The committed documents only hold `{{CANARY:...}}` placeholders.
 
 ## Requirements
 
@@ -138,12 +151,17 @@ src/rag_attack_lab/
   providers.py    chat models: ollama, anthropic (optional), fake
   embeddings.py   embeddings: ollama, fake (offline)
   vectorstore.py  opens the local Chroma store
+  canaries.py     generate and fill canary values at ingest time
   ingest.py       load TXT/PDF, chunk, store
   retriever.py    top-k search with source metadata
   rag.py          retrieve, build prompt, generate
-  cli.py          ingest / ask / reset commands
+  cli.py          ingest / ask / reset / doctor commands
 data/             fictional seed documents
+  internal/       fictional internal documents with canary placeholders
+  untrusted/      labeled teaching examples (injection, poisoning)
+docs/             overview, threat model, report outline
 tests/            offline tests
+VULNERABILITIES.md  the planted weaknesses
 ```
 
 ## License
