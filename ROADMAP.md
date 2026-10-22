@@ -72,7 +72,8 @@ The baseline is changed on purpose so it can be attacked in later phases. Every 
   (done: `docs/report/pentest-report.md` and `.pdf`)
 - Two-minute demo video or GIF (script ready: `docs/demo/demo.ps1` runs the sequence from an empty store in about 75 seconds;
   recording steps in `docs/demo/README.md`)
-- Write-up and public release
+- Write-up and public release (done: the repository is public, with secret scanning, push protection, and private
+  vulnerability reporting turned on)
 
 ## Scope and ethics
 
