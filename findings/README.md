@@ -16,6 +16,12 @@ This folder holds the output of the attack harness (`rag-lab attack` and `rag-la
   The benign questions measure the cost of the fixes: a fix that blocks or breaks an
   ordinary question is a false positive.
 
+- `llm01-layers.json` - `scripts/llm01_layers.py`: the LLM01 defense layers tested on
+  their own. Retrieval runs with `SECURE_MODE` off so the quarantined newsletter still
+  reaches the model, and each question is sent with the original prompt, the fenced
+  prompt, and the fenced prompt plus the output check. It records how many answers
+  contained the injected sentence at each layer, with every answer.
+
 ## How to produce them
 
 Run against a real model (Ollama) so the answers are genuine, not the offline fake:
