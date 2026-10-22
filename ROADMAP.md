@@ -8,7 +8,7 @@ Status key: Done / In progress / Planned
 | Version | Phase | Status |
 |---|---|---|
 | v0.1 | Clean RAG baseline | Done |
-| v1.0 | Documented vulnerable target | Planned |
+| v1.0 | Documented vulnerable target | In progress |
 | v1.1 | Minimal web UI | Planned |
 | v2.0 | Attack and findings | Planned |
 | v3.0 | Fix and measured retest | Planned |
@@ -26,7 +26,7 @@ A working retrieval-augmented generation pipeline with no deliberate weaknesses.
 - Offline test suite using a deterministic fake provider and fake embeddings
 - All configuration from environment variables
 
-## v1.0 — Documented vulnerable target (Planned)
+## v1.0 — Documented vulnerable target (In progress)
 
 The baseline is changed on purpose so it can be attacked in later phases. Every weakness is documented and tagged with its framework IDs.
 

@@ -9,6 +9,7 @@ from rag_attack_lab.embeddings import get_embeddings
 
 def get_vector_store(settings: Settings) -> Chroma:
     """Open (or create) the persistent Chroma collection on disk."""
+    # LLM09: one shared collection for every document and every user. No tenant or sensitivity isolation.
     return Chroma(
         collection_name=settings.chroma_collection,
         embedding_function=get_embeddings(settings),

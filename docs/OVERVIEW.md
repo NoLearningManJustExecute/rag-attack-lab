@@ -54,7 +54,7 @@ A RAG system trusts two things it should not fully trust: the user's question an
 - Exposure of hidden context such as the system prompt (OWASP LLM08).
 - Vector and embedding weaknesses, including poisoning of the index (OWASP LLM09).
 
-The full threat model is tracked as a dedicated document for the v1.0 milestone.
+The full threat model is in [threat-model.md](threat-model.md), and each weakness is documented in [VULNERABILITIES.md](../VULNERABILITIES.md).
 
 ## Engineering practices
 

@@ -9,6 +9,10 @@ __pycache__/
 .env
 chroma_db/
 
+# Canary values generated at ingest time (CANARY_FILE, default data/internal/.canaries).
+# Only {{CANARY:...}} placeholders are committed, never the values.
+.canaries
+
 # Personal Claude Code settings
 .claude/settings.local.json
 

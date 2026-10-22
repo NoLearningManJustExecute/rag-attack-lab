@@ -42,6 +42,7 @@ def _get_settings():
         data_dir=_DATA_DIR,
         chroma_dir=Path(tmp_dir),
         chroma_collection="promptfoo",
+        canary_file=Path(tmp_dir) / ".canaries",
     )
     ingest(_DATA_DIR, _settings)
     return _settings
