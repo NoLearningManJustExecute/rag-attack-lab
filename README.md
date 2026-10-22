@@ -84,7 +84,7 @@ rag-lab ask "What is the return policy?" --show-prompt
 rag-lab reset
 ```
 
-`python -m rag_attack_lab.cli <command>` works too. Running `ingest` twice stores the documents twice, so run `reset` first if you want a clean store.
+`python -m rag_attack_lab.cli <command>` works too. Running `ingest` again on the same files overwrites their chunks instead of adding duplicates. If you edit or remove a file, run `reset` and then `ingest` so its old chunks are dropped.
 
 ## Tests
 

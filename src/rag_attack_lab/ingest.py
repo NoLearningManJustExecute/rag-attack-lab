@@ -1,5 +1,7 @@
 """Load TXT and PDF files, split them into chunks, and store the chunks in Chroma."""
 
+import hashlib
+from collections import Counter
 from pathlib import Path
 
 from langchain_core.documents import Document
@@ -44,9 +46,25 @@ def split_documents(documents: list[Document], settings: Settings) -> list[Docum
         chunk_overlap=settings.chunk_overlap,
     )
     chunks = splitter.split_documents(documents)
-    for index, chunk in enumerate(chunks):
-        chunk.metadata["chunk"] = index
+
+    # Number each file's chunks from 0, so a chunk's number does not depend on
+    # which other files were ingested in the same run.
+    next_number: Counter[str] = Counter()
+    for chunk in chunks:
+        source = chunk.metadata["source"]
+        chunk.metadata["chunk"] = next_number[source]
+        next_number[source] += 1
     return chunks
+
+
+def chunk_id(chunk: Document) -> str:
+    """A stable ID for a chunk: source file, chunk number, and a short hash of the text.
+
+    Ingesting the same file again gives the same IDs, so Chroma overwrites the
+    stored chunks instead of adding duplicates.
+    """
+    content_hash = hashlib.sha256(chunk.page_content.encode("utf-8")).hexdigest()[:12]
+    return f"{chunk.metadata['source']}:{chunk.metadata['chunk']}:{content_hash}"
 
 
 def ingest(path: Path, settings: Settings) -> list[Document]:
@@ -57,5 +75,6 @@ def ingest(path: Path, settings: Settings) -> list[Document]:
 
     chunks = split_documents(documents, settings)
     if chunks:
-        get_vector_store(settings).add_documents(chunks)
+        ids = [chunk_id(chunk) for chunk in chunks]
+        get_vector_store(settings).add_documents(chunks, ids=ids)
     return chunks
