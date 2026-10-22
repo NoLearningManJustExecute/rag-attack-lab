@@ -66,7 +66,10 @@ jobs:
 
       # Rules and line length live in pyproject.toml under [tool.ruff].
       - name: Lint
-        run: ruff check --output-format=github src tests
+        run: ruff check --output-format=github src tests ci
+
+      - name: Check formatting
+        run: ruff format --check src tests ci
 
   dependency-audit:
     name: Dependency audit
@@ -98,3 +101,41 @@ jobs:
             --ignore-vuln PYSEC-2026-3813 \
             --ignore-vuln PYSEC-2026-3814 \
             --ignore-vuln PYSEC-2026-3815
+
+  red-team:
+    name: Red-team checks (promptfoo)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Install the package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Install promptfoo
+        working-directory: ci/promptfoo
+        run: npm ci --no-audit --no-fund
+
+      # promptfoo runs the pipeline through provider.py with the fake chat model and
+      # fake embeddings: no model, no network, no secrets. It exits non-zero if any
+      # assertion fails, which fails the build.
+      - name: Run red-team checks
+        working-directory: ci/promptfoo
+        env:
+          PROMPTFOO_PYTHON: python
+          PROMPTFOO_DISABLE_TELEMETRY: "1"
+          PROMPTFOO_DISABLE_UPDATE: "1"
+        run: npm run eval

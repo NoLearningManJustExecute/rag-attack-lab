@@ -6,7 +6,7 @@
 
 **Status: v0.1 baseline.** This version is a clean, working RAG pipeline with no planted vulnerabilities. Vulnerabilities and attack exercises land in v1.0.
 
-See [ROADMAP.md](ROADMAP.md) for project phases and [SECURITY.md](SECURITY.md) for the security policy.
+See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP.md](ROADMAP.md) for project phases, [CONTRIBUTING.md](CONTRIBUTING.md) to get set up, and [SECURITY.md](SECURITY.md) for the security policy.
 
 [![CI](https://github.com/NoLearningManJustExecute/rag-attack-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/NoLearningManJustExecute/rag-attack-lab/actions/workflows/ci.yml)
 

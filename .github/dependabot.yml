@@ -26,3 +26,16 @@ updates:
       actions-minor-and-patch:
         patterns: ["*"]
         update-types: ["minor", "patch"]
+
+  # The promptfoo red-team harness.
+  - package-ecosystem: "npm"
+    directory: "/ci/promptfoo"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+    groups:
+      npm-minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
