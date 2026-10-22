@@ -102,7 +102,7 @@ ruff check src tests
 pip-audit -r requirements.txt --ignore-vuln PYSEC-2026-311 --ignore-vuln PYSEC-2026-3813 --ignore-vuln PYSEC-2026-3814 --ignore-vuln PYSEC-2026-3815
 ```
 
-CI runs all three on every push to `main` and every pull request: tests on Ubuntu and Windows, lint, and the dependency audit. The audit ignores only the four chromadb advisories below; any new advisory fails the build. pip-audit reports "5 ignored" because it lists one of the four twice.
+CI runs all three on every push to `main` and every pull request, except changes that touch only docs: tests, lint, and the dependency audit. Tests run on Ubuntu every time, and on Windows for pull requests and a weekly scheduled run. The audit ignores only the four chromadb advisories below; any new advisory fails the build. pip-audit reports "5 ignored" because it lists one of the four twice.
 
 ## Known dependency advisories
 

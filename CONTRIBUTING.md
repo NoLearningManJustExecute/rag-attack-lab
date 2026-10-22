@@ -20,7 +20,7 @@ To run the lab against a real model, install [Ollama](https://ollama.com), pull 
 
 ## Checks to run before you push
 
-CI runs all of these on every push to `main` and every pull request. Run them locally first:
+CI runs all of these on every push to `main` and every pull request, except changes that touch only docs. Tests run on Ubuntu every time, and on Windows for pull requests and a weekly scheduled run. Run them locally first:
 
 ```bash
 python -m pytest                 # offline tests

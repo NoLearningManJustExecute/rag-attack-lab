@@ -1,9 +1,27 @@
 name: CI
 
+# Doc-only changes skip CI to save Actions minutes. This is safe because the main
+# ruleset has no required status checks. If one is added, a doc-only pull request
+# would wait forever for a check that never runs.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".editorconfig"
+      - ".gitignore"
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".editorconfig"
+      - ".gitignore"
+  # Weekly full run on main, the only run that tests Windows outside pull requests.
+  schedule:
+    - cron: "0 6 * * 1" # Mondays at 06:00 UTC
   workflow_dispatch:
 
 # Least privilege: jobs can read the repo and nothing else.
@@ -27,7 +45,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # Windows minutes cost twice as much as Linux minutes in a private repo, so Windows
+        # runs only on pull requests and the weekly schedule. Other runs test Ubuntu only.
+        os: ${{ fromJSON((github.event_name == 'pull_request' || github.event_name == 'schedule') && '["ubuntu-latest", "windows-latest"]' || '["ubuntu-latest"]') }}
     steps:
       # Actions are pinned to full commit SHAs. Dependabot keeps them updated.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -37,6 +57,11 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
+          # Restores pip's download cache, keyed on these files. Packages are still installed each run.
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            pyproject.toml
 
       - name: Install dependencies
         run: |
@@ -60,6 +85,8 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
 
       - name: Install ruff
         run: python -m pip install -r requirements-dev.txt
@@ -83,6 +110,8 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
 
       - name: Install pip-audit
         run: python -m pip install -r requirements-dev.txt
@@ -114,10 +143,17 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            pyproject.toml
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
+          # Restores npm's download cache, keyed on the promptfoo lockfile.
+          cache: npm
+          cache-dependency-path: ci/promptfoo/package-lock.json
 
       - name: Install the package
         run: |
