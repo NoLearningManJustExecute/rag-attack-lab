@@ -25,4 +25,6 @@ def settings(tmp_path):
         chunk_size=400,
         chunk_overlap=50,
         top_k=3,
+        # Tests start from the vulnerable default whatever .env says; test_fixes.py turns it on.
+        secure_mode=False,
     )

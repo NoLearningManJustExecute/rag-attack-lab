@@ -8,10 +8,10 @@ Status key: Done / In progress / Planned
 | Version | Phase | Status |
 |---|---|---|
 | v0.1 | Clean RAG baseline | Done |
-| v1.0 | Documented vulnerable target | In progress |
+| v1.0 | Documented vulnerable target | Done |
 | v1.1 | Minimal web UI | Planned |
-| v2.0 | Attack and findings | Planned |
-| v3.0 | Fix and measured retest | Planned |
+| v2.0 | Attack and findings | Done |
+| v3.0 | Fix and measured retest | In progress |
 | v4.0 | Automated red-team checks in CI | Planned |
 | v5.0 | Pentest report and publication | Planned |
 
@@ -26,7 +26,7 @@ A working retrieval-augmented generation pipeline with no deliberate weaknesses.
 - Offline test suite using a deterministic fake provider and fake embeddings
 - All configuration from environment variables
 
-## v1.0 — Documented vulnerable target (In progress)
+## v1.0 — Documented vulnerable target (Done)
 
 The baseline is changed on purpose so it can be attacked in later phases. Every weakness is documented and tagged with its framework IDs.
 
@@ -43,18 +43,20 @@ The baseline is changed on purpose so it can be attacked in later phases. Every 
 - A small local web interface, bound to 127.0.0.1 only
 - Adds a rendering surface so output-handling risks (OWASP LLM10) can be studied
 
-## v2.0 — Attack and findings (Planned)
+## v2.0 — Attack and findings (Done)
 
 - Test the lab's own weaknesses, and only this lab
 - Every finding records evidence, impact, and severity
 - Findings show real impact, not cosmetic model behavior
+- `rag-lab attack` runs the four cases; a real run against llama3.1:8b triggered all four (`findings/`)
 
-## v3.0 — Fix and measured retest (Planned)
+## v3.0 — Fix and measured retest (In progress)
 
-- Fix each finding
+- Fix each finding, behind a `SECURE_MODE` flag so one harness shows the before and the after (done)
 - Evaluation runner that outputs JSON metrics before and after the fixes: attack-block rate, benign-block rate (false positives), and accuracy
-- Ingest-time checks for suspicious documents, with the ability to purge and rebuild the index
-- The v1.0 weakness tests flip to confirm each fix
+- Ingest-time checks for suspicious documents, with the ability to purge and rebuild the index (done: flagged and
+  untrusted documents are quarantined from retrieval; `reset` then `ingest` rebuilds the index)
+- New tests confirm each fix in secure mode, while the v1.0 weakness tests keep passing in the default mode (done)
 
 ## v4.0 — Automated red-team checks in CI (Planned)
 

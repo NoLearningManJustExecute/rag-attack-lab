@@ -1,4 +1,4 @@
-"""Command line interface: ingest, ask, reset, doctor."""
+"""Command line interface: ingest, ask, attack, reset, doctor."""
 
 from dataclasses import fields
 from pathlib import Path
@@ -10,7 +10,7 @@ from rich.table import Table
 
 from rag_attack_lab.attacks.cases import CASES_BY_ID
 from rag_attack_lab.attacks.runner import run_all, run_attack, write_findings
-from rag_attack_lab.config import load_settings
+from rag_attack_lab.config import Settings, load_settings
 from rag_attack_lab.doctor import FAIL, PASS, run_checks
 from rag_attack_lab.ingest import ingest as ingest_path
 from rag_attack_lab.providers import describe_model
@@ -19,6 +19,10 @@ from rag_attack_lab.vectorstore import reset_vector_store
 
 app = typer.Typer(help="RAG Attack Lab: a deliberately vulnerable RAG app. Local only, fake data only.")
 console = Console()
+
+
+def mode_label(settings: Settings) -> str:
+    return "SECURE_MODE on" if settings.secure_mode else "SECURE_MODE off"
 
 
 @app.command()
@@ -31,6 +35,17 @@ def ingest(
     chunks = ingest_path(target, settings)
     sources = sorted({chunk.metadata["source"] for chunk in chunks})
     console.print(f"Stored {len(chunks)} chunks from {len(sources)} files: {', '.join(sources)}")
+
+    # Every chunk is labeled at ingest; SECURE_MODE decides whether retrieval acts on the labels.
+    labels = {chunk.metadata["source"]: chunk.metadata for chunk in chunks}
+    held_back = sorted(
+        f"{source} ({meta['sensitivity']}{', flagged suspicious' if meta['suspicious'] else ''})"
+        for source, meta in labels.items()
+        if meta["sensitivity"] != "public" or meta["suspicious"]
+    )
+    if held_back:
+        action = "excluded from retrieval" if settings.secure_mode else "retrievable, because SECURE_MODE is off"
+        console.print(f"Not public ({action}): {', '.join(held_back)}")
 
 
 @app.command()
@@ -45,7 +60,11 @@ def ask(
     if show_prompt:
         console.print(Panel(result.prompt, title="Prompt", expand=False))
 
-    console.print(Panel(result.answer, title=f"Answer ({describe_model(settings)})", expand=False))
+    console.print(
+        Panel(result.answer, title=f"Answer ({describe_model(settings)}, {mode_label(settings)})", expand=False)
+    )
+    for note in result.guardrails:
+        console.print(f"[yellow]Output check:[/yellow] {note}")
 
     table = Table(title="Retrieved sources")
     table.add_column("#")
@@ -79,7 +98,7 @@ def attack(
     else:
         findings = run_all(settings)
 
-    table = Table(title=f"Attack results ({describe_model(settings)})")
+    table = Table(title=f"Attack results ({describe_model(settings)}, {mode_label(settings)})")
     table.add_column("Case")
     table.add_column("OWASP")
     table.add_column("Severity")

@@ -30,6 +30,9 @@ def run_attack(case: AttackCase, settings: Settings) -> Finding:
         retrieved=retrieved,
         model=describe_model(settings),
         timestamp=datetime.now(UTC).isoformat(timespec="seconds"),
+        secure_mode=result.secure_mode,
+        raw_answer=result.raw_answer,
+        guardrails=result.guardrails,
     )
 
 
@@ -42,7 +45,8 @@ def render_markdown(findings: list[Finding]) -> str:
     """Render findings as report-ready markdown: a summary table, then one section each."""
     model = findings[0].model if findings else "unknown"
     stamp = findings[0].timestamp if findings else ""
-    lines = ["# Attack findings", "", f"Model: {model}", f"Run: {stamp}", ""]
+    mode = "on (v3 fixes active)" if findings and findings[0].secure_mode else "off (vulnerable)"
+    lines = ["# Attack findings", "", f"Model: {model}", f"SECURE_MODE: {mode}", f"Run: {stamp}", ""]
 
     lines += ["| Case | OWASP | Severity | Result |", "| --- | --- | --- | --- |"]
     for finding in findings:
@@ -85,6 +89,10 @@ def render_markdown(findings: list[Finding]) -> str:
             "```",
             "",
         ]
+        if finding.guardrails:
+            lines += ["Output checks that fired:", ""]
+            lines += [f"- {note}" for note in finding.guardrails]
+            lines += ["", "Model answer before the output checks:", "", "```", finding.raw_answer, "```", ""]
         sources = ", ".join(f"{item['source']}#{item['chunk']}" for item in finding.retrieved) or "(none)"
         lines += [f"Retrieved: {sources}", ""]
 

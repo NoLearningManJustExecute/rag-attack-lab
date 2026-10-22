@@ -1,7 +1,8 @@
 """Offline tests confirming each planted weakness is present. See VULNERABILITIES.md.
 
 These check the vulnerable structure, not live attacks: they run with the fake chat model and fake
-embeddings, so no model ever reads the prompts. In v3.0 these assertions flip to confirm each fix.
+embeddings, so no model ever reads the prompts. They run with SECURE_MODE off, the default, and stay
+true there. tests/test_fixes.py confirms that each weakness is closed with SECURE_MODE on.
 """
 
 import inspect
