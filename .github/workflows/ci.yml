@@ -14,6 +14,11 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Bash on every OS (Git Bash on Windows), so a failing command in a multi-line step fails the step.
+defaults:
+  run:
+    shell: bash
+
 jobs:
   tests:
     name: Tests (${{ matrix.os }})
@@ -42,3 +47,34 @@ jobs:
       # Tests use the fake chat provider and fake embeddings: no model, no network, no secrets.
       - name: Run tests
         run: python -m pytest -q
+
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install pip-audit
+        run: python -m pip install -r requirements-dev.txt
+
+      # Fails on any known vulnerability in requirements.txt, except the four chromadb
+      # advisories already reviewed in README.md ("Known dependency advisories").
+      # They affect the Chroma HTTP server only, which this lab never starts.
+      #   PYSEC-2026-311  = CVE-2026-45829 / GHSA-f4j7-r4q5-qw2c
+      #   PYSEC-2026-3813 = CVE-2026-45830 / GHSA-2wm9-hf6c-p5cr
+      #   PYSEC-2026-3814 = CVE-2026-45833 / GHSA-36p7-vc44-83pf
+      #   PYSEC-2026-3815 = CVE-2026-45831 / GHSA-xph7-9rjv-w5fr
+      - name: Audit dependencies
+        run: |
+          pip-audit -r requirements.txt \
+            --ignore-vuln PYSEC-2026-311 \
+            --ignore-vuln PYSEC-2026-3813 \
+            --ignore-vuln PYSEC-2026-3814 \
+            --ignore-vuln PYSEC-2026-3815
