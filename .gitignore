@@ -11,3 +11,6 @@ chroma_db/
 
 # Personal Claude Code settings
 .claude/settings.local.json
+
+# Node (promptfoo CI harness)
+node_modules/

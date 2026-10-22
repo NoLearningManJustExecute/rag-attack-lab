@@ -1,0 +1,11 @@
+{
+  "name": "rag-attack-lab-promptfoo",
+  "private": true,
+  "description": "Offline promptfoo checks for the RAG Attack Lab pipeline, run in CI.",
+  "scripts": {
+    "eval": "promptfoo eval -c promptfooconfig.yaml --no-cache -j 1"
+  },
+  "devDependencies": {
+    "promptfoo": "0.124.1"
+  }
+}

@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+#
+# Offline, deterministic checks for the RAG pipeline, run in CI by GitHub Actions.
+# The provider (provider.py) runs the pipeline with the fake chat model and the
+# deterministic hashing embeddings, so these checks need no model, no network, and
+# no API keys. They verify that the pipeline retrieves the right document and grounds
+# the prompt in it. Real red-team attack cases are added here from v2.0 onward.
+description: RAG Attack Lab pipeline checks (offline)
+
+providers:
+  - id: file://provider.py
+    label: rag-pipeline-offline
+
+# The prompt sent to the provider is just the user's question.
+prompts:
+  - "{{query}}"
+
+tests:
+  - description: A vacation question retrieves the handbook and its figure
+    vars:
+      query: How many vacation days do full-time employees get?
+    assert:
+      - type: icontains
+        value: "[Source: employee_handbook.txt]"
+      - type: icontains
+        value: "25 days"
+
+  - description: A plan question retrieves the product overview
+    vars:
+      query: What does the Northwind Plus plan include?
+    assert:
+      - type: icontains
+        value: "[Source: product_overview.txt]"
+      - type: icontains
+        value: "extended warranty"
+
+  - description: Every prompt carries the grounding instruction
+    vars:
+      query: tell me about the company
+    assert:
+      - type: icontains
+        value: "Answer the question using only the context"
+      - type: icontains
+        value: "say you don't know"
