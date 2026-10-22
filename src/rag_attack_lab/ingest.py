@@ -8,6 +8,7 @@ from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 
+from rag_attack_lab.canaries import fill_canaries
 from rag_attack_lab.config import Settings
 from rag_attack_lab.vectorstore import get_vector_store
 
@@ -33,10 +34,10 @@ def load_file(path: Path) -> list[Document]:
 
 
 def find_files(path: Path) -> list[Path]:
-    """Return the supported files at `path` (a single file or a folder)."""
+    """Return the supported files at `path` (a single file, or a folder and all its subfolders)."""
     if path.is_file():
         return [path]
-    return sorted(p for p in path.iterdir() if p.suffix.lower() in SUPPORTED_EXTENSIONS)
+    return sorted(p for p in path.rglob("*") if p.is_file() and p.suffix.lower() in SUPPORTED_EXTENSIONS)
 
 
 def split_documents(documents: list[Document], settings: Settings) -> list[Document]:
@@ -72,6 +73,10 @@ def ingest(path: Path, settings: Settings) -> list[Document]:
     documents: list[Document] = []
     for file in find_files(path):
         documents.extend(load_file(file))
+
+    # Swap canary placeholders for their generated values before the text is chunked and stored.
+    for document in documents:
+        document.page_content = fill_canaries(document.page_content, settings)
 
     chunks = split_documents(documents, settings)
     if chunks:

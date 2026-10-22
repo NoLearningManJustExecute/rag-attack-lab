@@ -60,7 +60,8 @@ All settings come from environment variables. Defaults live in `src/rag_attack_l
 | `OLLAMA_EMBED_MODEL` | `nomic-embed-text` | Embedding model |
 | `CHROMA_DIR` | `chroma_db` | Folder for the local vector database |
 | `CHROMA_COLLECTION` | `rag_attack_lab` | Chroma collection name |
-| `DATA_DIR` | `data` | Default folder for `ingest` |
+| `DATA_DIR` | `data` | Default folder for `ingest` (subfolders included) |
+| `CANARY_FILE` | `data/internal/.canaries` | Where `ingest` saves the canary values it generates (git-ignored) |
 | `CHUNK_SIZE` / `CHUNK_OVERLAP` | `800` / `100` | Chunking, in characters |
 | `TOP_K` | `4` | How many chunks to retrieve |
 | `LLM_TEMPERATURE` | `0` | Sampling temperature |

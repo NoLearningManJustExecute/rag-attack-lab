@@ -13,7 +13,7 @@ DATA_DIR = REPO_ROOT / "data"
 
 @pytest.fixture
 def settings(tmp_path):
-    """Offline settings with a throwaway Chroma folder for each test."""
+    """Offline settings with a throwaway Chroma folder and canary file for each test."""
     return replace(
         load_settings(),
         llm_provider="fake",
@@ -21,6 +21,7 @@ def settings(tmp_path):
         chroma_dir=tmp_path / "chroma_db",
         chroma_collection="test_collection",
         data_dir=DATA_DIR,
+        canary_file=tmp_path / ".canaries",
         chunk_size=400,
         chunk_overlap=50,
         top_k=3,
