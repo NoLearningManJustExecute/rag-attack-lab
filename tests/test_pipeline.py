@@ -45,6 +45,23 @@ def test_ingestion_creates_chunks(settings):
     assert len(get_vector_store(settings).get()["ids"]) == len(chunks)
 
 
+def test_ingesting_the_same_file_twice_does_not_duplicate_chunks(settings):
+    handbook = settings.data_dir / "employee_handbook.txt"
+
+    first = ingest(handbook, settings)
+    second = ingest(handbook, settings)
+
+    assert [chunk.metadata["chunk"] for chunk in first] == [chunk.metadata["chunk"] for chunk in second]
+    assert len(get_vector_store(settings).get()["ids"]) == len(first)
+
+
+def test_ingesting_a_file_after_its_folder_does_not_duplicate_chunks(settings):
+    all_chunks = ingest(settings.data_dir, settings)
+    ingest(settings.data_dir / "customer_faq.txt", settings)
+
+    assert len(get_vector_store(settings).get()["ids"]) == len(all_chunks)
+
+
 def test_pdf_loading(tmp_path):
     pdf_path = tmp_path / "sample.pdf"
     pdf_path.write_bytes(make_minimal_pdf("Northwind PDF test"))
