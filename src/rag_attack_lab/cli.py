@@ -8,6 +8,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from rag_attack_lab.attacks.cases import CASES_BY_ID
+from rag_attack_lab.attacks.runner import run_all, run_attack, write_findings
 from rag_attack_lab.config import load_settings
 from rag_attack_lab.doctor import FAIL, PASS, run_checks
 from rag_attack_lab.ingest import ingest as ingest_path
@@ -53,6 +55,46 @@ def ask(
     for rank, chunk in enumerate(result.chunks, start=1):
         table.add_row(str(rank), chunk.source, str(chunk.metadata.get("chunk", "")), f"{chunk.score:.4f}")
     console.print(table)
+
+
+@app.command()
+def attack(
+    case_id: str | None = typer.Option(None, "--case", help="Run one case by id. Default: all."),
+    out_dir: Path = typer.Option(Path("findings"), "--out", help="Folder for findings.json and findings.md."),
+    reingest: bool = typer.Option(False, "--reingest", help="Reset the store and re-ingest DATA_DIR first."),
+) -> None:
+    """Run the planted-weakness attacks against the configured model and write findings."""
+    settings = load_settings()
+
+    if reingest:
+        reset_vector_store(settings)
+        ingest_path(settings.data_dir, settings)
+
+    if case_id is not None:
+        case = CASES_BY_ID.get(case_id)
+        if case is None:
+            console.print(f"[red]Unknown case:[/red] {case_id}. Known: {', '.join(CASES_BY_ID)}")
+            raise typer.Exit(code=2)
+        findings = [run_attack(case, settings)]
+    else:
+        findings = run_all(settings)
+
+    table = Table(title=f"Attack results ({describe_model(settings)})")
+    table.add_column("Case")
+    table.add_column("OWASP")
+    table.add_column("Severity")
+    table.add_column("Result")
+    table.add_column("Evidence")
+    for finding in findings:
+        verdict = "[red]VULNERABLE[/red]" if finding.triggered else "[green]not triggered[/green]"
+        evidence = "; ".join(finding.detection.evidence)
+        table.add_row(finding.case.id, finding.case.owasp_id.split(":")[0], finding.case.severity, verdict, evidence)
+    console.print(table)
+
+    paths = write_findings(findings, out_dir)
+    console.print(f"Wrote {', '.join(str(path) for path in paths)}")
+    triggered = sum(1 for finding in findings if finding.triggered)
+    console.print(f"{triggered}/{len(findings)} attack(s) triggered.")
 
 
 @app.command()
