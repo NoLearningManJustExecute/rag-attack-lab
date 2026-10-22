@@ -6,7 +6,9 @@
 
 **Status: v0.1 baseline.** This version is a clean, working RAG pipeline with no planted vulnerabilities. Vulnerabilities and attack exercises land in v1.0.
 
-See [ROADMAP.md](ROADMAP.md) for project phases.
+See [ROADMAP.md](ROADMAP.md) for project phases and [SECURITY.md](SECURITY.md) for the security policy.
+
+[![CI](https://github.com/NoLearningManJustExecute/rag-attack-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/NoLearningManJustExecute/rag-attack-lab/actions/workflows/ci.yml)
 
 ## What it does
 
@@ -91,6 +93,16 @@ The tests run fully offline. They use a fake chat model and a deterministic bag-
 ```powershell
 python -m pytest
 ```
+
+Lint and dependency checks use the tools pinned in `requirements-dev.txt`:
+
+```powershell
+pip install -r requirements-dev.txt
+ruff check src tests
+pip-audit -r requirements.txt --ignore-vuln PYSEC-2026-311 --ignore-vuln PYSEC-2026-3813 --ignore-vuln PYSEC-2026-3814 --ignore-vuln PYSEC-2026-3815
+```
+
+CI runs all three on every push to `main` and every pull request: tests on Ubuntu and Windows, lint, and the dependency audit. The audit ignores only the four chromadb advisories below; any new advisory fails the build. pip-audit reports "5 ignored" because it lists one of the four twice.
 
 ## Known dependency advisories
 

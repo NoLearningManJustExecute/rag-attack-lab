@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a real security problem
+    url: https://github.com/NoLearningManJustExecute/rag-attack-lab/security/advisories/new
+    about: Use private vulnerability reporting. Don't open a public issue for real security problems.
