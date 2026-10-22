@@ -17,6 +17,8 @@ class RetrievedChunk:
 def retrieve(question: str, settings: Settings, k: int | None = None) -> list[RetrievedChunk]:
     """Return the top-k chunks for `question`, each with its source file name."""
     store = get_vector_store(settings)
+    # LLM02: no access-control filter. Any question can retrieve any chunk, including internal documents
+    # and their canary secrets. There is no notion of who is asking.
     results = store.similarity_search_with_score(question, k=k or settings.top_k)
     return [
         RetrievedChunk(

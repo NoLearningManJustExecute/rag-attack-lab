@@ -70,6 +70,9 @@ def chunk_id(chunk: Document) -> str:
 
 def ingest(path: Path, settings: Settings) -> list[Document]:
     """Load, split, and store everything at `path`. Returns the chunks that were stored."""
+    # LLM09: every file found is trusted the same way. Nothing checks where it came from or what it says,
+    # and no trust or sensitivity label is recorded, so untrusted or poisoned documents go straight in.
+    # LLM02: internal documents (with their canaries) are stored next to the public ones.
     documents: list[Document] = []
     for file in find_files(path):
         documents.extend(load_file(file))
