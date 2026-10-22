@@ -1,4 +1,4 @@
-"""Command line interface: ingest, ask, attack, reset, doctor."""
+"""Command line interface: ingest, ask, attack, eval, reset, doctor."""
 
 from dataclasses import fields
 from pathlib import Path
@@ -9,7 +9,8 @@ from rich.panel import Panel
 from rich.table import Table
 
 from rag_attack_lab.attacks.cases import CASES_BY_ID
-from rag_attack_lab.attacks.runner import run_all, run_attack, write_findings
+from rag_attack_lab.attacks.metrics import run_eval, write_metrics
+from rag_attack_lab.attacks.runner import default_name, run_all, run_attack, write_findings
 from rag_attack_lab.config import Settings, load_settings
 from rag_attack_lab.doctor import FAIL, PASS, run_checks
 from rag_attack_lab.ingest import ingest as ingest_path
@@ -79,7 +80,10 @@ def ask(
 @app.command()
 def attack(
     case_id: str | None = typer.Option(None, "--case", help="Run one case by id. Default: all."),
-    out_dir: Path = typer.Option(Path("findings"), "--out", help="Folder for findings.json and findings.md."),
+    out_dir: Path = typer.Option(Path("findings"), "--out", help="Folder for the output files."),
+    name: str | None = typer.Option(
+        None, "--name", help="Output file name without extension. Default: findings, or retest with SECURE_MODE on."
+    ),
     reingest: bool = typer.Option(False, "--reingest", help="Reset the store and re-ingest DATA_DIR first."),
 ) -> None:
     """Run the planted-weakness attacks against the configured model and write findings."""
@@ -110,10 +114,58 @@ def attack(
         table.add_row(finding.case.id, finding.case.owasp_id.split(":")[0], finding.case.severity, verdict, evidence)
     console.print(table)
 
-    paths = write_findings(findings, out_dir)
+    paths = write_findings(findings, out_dir, name or default_name(settings))
     console.print(f"Wrote {', '.join(str(path) for path in paths)}")
     triggered = sum(1 for finding in findings if finding.triggered)
     console.print(f"{triggered}/{len(findings)} attack(s) triggered.")
+
+
+@app.command(name="eval")
+def evaluate(
+    out_dir: Path = typer.Option(Path("findings"), "--out", help="Folder for metrics.json."),
+    reingest: bool = typer.Option(False, "--reingest", help="Reset the store and re-ingest DATA_DIR first."),
+) -> None:
+    """Run every attack and benign case with SECURE_MODE off, then on, and write before/after metrics."""
+    settings = load_settings()
+
+    if reingest:
+        reset_vector_store(settings)
+        ingest_path(settings.data_dir, settings)
+
+    # SECURE_MODE in the environment is ignored here: eval always runs both modes.
+    metrics = run_eval(settings)
+
+    table = Table(title=f"Before and after the v3 fixes ({metrics['model']})")
+    table.add_column("Case")
+    table.add_column("OWASP")
+    table.add_column("Before (SECURE_MODE off)")
+    table.add_column("After (SECURE_MODE on)")
+    for attack_case in metrics["attacks"]:
+        before = "[red]VULNERABLE[/red]" if attack_case["before"]["triggered"] else "[green]not triggered[/green]"
+        after = "[red]VULNERABLE[/red]" if attack_case["after"]["triggered"] else "[green]not triggered[/green]"
+        table.add_row(attack_case["id"], attack_case["owasp"].split(":")[0], before, after)
+    console.print(table)
+
+    before, after = metrics["totals"]["before"], metrics["totals"]["after"]
+    totals = Table(title="Totals")
+    totals.add_column("Metric")
+    totals.add_column("Before")
+    totals.add_column("After")
+    totals.add_row(
+        "Attacks triggered",
+        f"{before['attacks_triggered']}/{before['attacks']}",
+        f"{after['attacks_triggered']}/{after['attacks']}",
+    )
+    totals.add_row("Attack block rate", f"{before['attack_block_rate']:.0%}", f"{after['attack_block_rate']:.0%}")
+    totals.add_row(
+        "Benign answers correct",
+        f"{before['benign_correct']}/{before['benign_cases']}",
+        f"{after['benign_correct']}/{after['benign_cases']}",
+    )
+    totals.add_row("Benign block rate", f"{before['benign_block_rate']:.0%}", f"{after['benign_block_rate']:.0%}")
+    console.print(totals)
+
+    console.print(f"Wrote {write_metrics(metrics, out_dir)}")
 
 
 @app.command()

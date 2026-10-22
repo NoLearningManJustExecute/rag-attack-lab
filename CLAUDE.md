@@ -33,7 +33,10 @@ These apply to every commit and PR, in every session.
 
 ## Layout
 
-- `src/rag_attack_lab/`: config, providers, embeddings, ingest, vectorstore, retriever, rag, cli
+- `src/rag_attack_lab/`: config, providers, embeddings, canaries, ingest, vectorstore, retriever, rag, cli
+- `src/rag_attack_lab/defenses.py`: the v3 fixes, active only when `SECURE_MODE` is on
+- `src/rag_attack_lab/attacks/`: the attack harness (cases, detectors, runner, metrics)
+- `findings/`: committed attack evidence (before, retest after, metrics)
 - `data/`: seed documents (fake company content)
 - `tests/`: offline tests using the fake chat provider and fake embeddings
 - Run tests: `.venv\Scripts\python.exe -m pytest`
