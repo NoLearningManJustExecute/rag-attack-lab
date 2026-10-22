@@ -57,5 +57,5 @@ PROMPTFOO_PYTHON=python npm run eval
 - Never commit real data, real secrets, or secrets in a realistic provider-key format. Use obviously fake markers like `RAL-CANARY-...`. Realistic formats trip GitHub push protection.
 - Never start a Chroma server (`chroma run`). The lab uses `chromadb.PersistentClient` in-process only. See the README's "Known dependency advisories".
 - Read everything from environment variables with defaults in `config.py` and `.env.example`. Don't hardcode models, paths, or keys.
-- Any planted weakness must be documented in `VULNERABILITIES.md` and mapped to the OWASP Top 10 for LLM Applications (2026) and MITRE ATLAS.
+- Any planted weakness must be documented in `VULNERABILITIES.md` (added with the first planted weakness in v1.0) and mapped to the OWASP Top 10 for LLM Applications (2026) and MITRE ATLAS.
 - Keep dependencies lean and pinned.
