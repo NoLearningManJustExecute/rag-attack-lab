@@ -4,7 +4,7 @@
 > **Local only.** Run it on your own machine. Never deploy it or expose it to a network.
 > **Fake data only.** Every document in this repo is invented. Never load real or sensitive data into it.
 
-**Status: v3.0 fixed and retested.** The RAG pipeline has four deliberately planted, documented weaknesses, an attack harness (`rag-lab attack`) that exploits them, and one fix per weakness behind `SECURE_MODE=true`. v5.0 in progress: the [pentest report](docs/report/pentest-report.md) is done; the demo and the public release are next.
+**Status: v3.0 fixed and retested.** The RAG pipeline has four deliberately planted, documented weaknesses, an attack harness (`rag-lab attack`) that exploits them, and one fix per weakness behind `SECURE_MODE=true`. v5.0 in progress: the [pentest report](docs/report/pentest-report.md) and the [two-minute demo script](docs/demo/README.md) are done; the public release is next.
 
 See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP.md](ROADMAP.md) for project phases, [CONTRIBUTING.md](CONTRIBUTING.md) to get set up, and [SECURITY.md](SECURITY.md) for the security policy.
 
@@ -71,6 +71,10 @@ rag-lab eval
 Model answers can vary between machines and model builds, even at temperature 0. The verdicts above are from the committed run.
 
 To test the LLM01 layers on their own (quarantine bypassed, so the newsletter reaches the model), run `python scripts\llm01_layers.py`. It writes `findings\llm01-layers.json`; the committed run found the injected sentence in 4 of 4 answers with the original prompt, 2 of 4 with fencing alone, and 0 of 4 with fencing plus the output check.
+
+### Two-minute demo
+
+`.\docs\demo\demo.ps1` runs the whole story from a clean store: ingest, attack (4/4), turn on `SECURE_MODE`, attack again (0/4). It pauses between steps for narration, writes to the git-ignored `demo_output\`, and never touches `findings\`. Recording steps and a suggested narration are in [docs/demo/README.md](docs/demo/README.md).
 
 ### Pentest report
 
@@ -214,7 +218,7 @@ src/rag_attack_lab/
 data/             fictional seed documents
   internal/       fictional internal documents with canary placeholders
   untrusted/      labeled teaching examples (injection, poisoning)
-docs/             overview, threat model, pentest report
+docs/             overview, threat model, pentest report, demo script
 tests/            offline tests
 scripts/          the LLM01 layer test and the report renderer
 findings/         attack evidence: before, retest, metrics, LLM01 layers

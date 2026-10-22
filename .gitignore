@@ -9,6 +9,9 @@ __pycache__/
 .env
 chroma_db/
 
+# Output of the demo script (docs/demo/demo.ps1). The committed evidence lives in findings/.
+demo_output/
+
 # Canary values generated at ingest time (CANARY_FILE, default data/internal/.canaries).
 # Only {{CANARY:...}} placeholders are committed, never the values.
 .canaries
