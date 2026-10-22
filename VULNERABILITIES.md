@@ -54,7 +54,8 @@ For the system description, trust boundaries, and assets, see the [threat model]
     Look for the `# LLM02` comment.
   - `src/rag_attack_lab/retriever.py`, `retrieve()`: the similarity search has no filter. Look for the `# LLM02` comment.
 - **Why it is vulnerable:** there is no access control anywhere in the pipeline. Retrieval does not know who is asking,
-  documents carry no sensitivity label, and nothing checks answers for secrets. Any question that is similar enough to
+  nothing acts on a document's sensitivity (since v3.0 ingest records a label, but only `SECURE_MODE` uses it), and
+  nothing checks answers for secrets. Any question that is similar enough to
   an internal document pulls it, canaries included, into the prompt.
 - **What would prevent it:** keep secrets out of the corpus entirely, label documents by sensitivity, filter retrieval
   by the caller's permissions, and scan answers for secrets before returning them.
@@ -82,16 +83,17 @@ For the system description, trust boundaries, and assets, see the [threat model]
 - **MITRE ATLAS:** AML.T0070 RAG Poisoning
 - **Where it lives:**
   - `src/rag_attack_lab/ingest.py`, `find_files()` and `ingest()`: every supported file under the folder, including
-    subfolders, is ingested with no checks. Look for the `# LLM09` comment.
+    subfolders, goes into the index. Since v3.0 ingest also records a trust label and a suspicious-content flag, but
+    with `SECURE_MODE` off nothing acts on them. Look for the `# LLM09` comment.
   - `src/rag_attack_lab/vectorstore.py`, `get_vector_store()`: one shared collection for everything. Look for the
     `# LLM09` comment.
   - `src/rag_attack_lab/rag.py`, `build_prompt()`: trusted and untrusted chunks get the same label.
   - `data/untrusted/return_policy_update.txt`: a labeled teaching example that contradicts the real return policy in
     `data/customer_faq.txt`.
 - **Why it is vulnerable:** the index has no isolation and no provenance. Anyone who can put a file in the data folder
-  can add content that is retrieved and presented exactly like the company's own documents. Nothing records where a
-  document came from, nothing reviews its content, and the prompt gives the model no way to tell trusted from untrusted
-  text.
+  can add content that is retrieved and presented exactly like the company's own documents. Retrieval ignores where a
+  document came from and what the content screen found, and the prompt gives the model no way to tell trusted from
+  untrusted text.
 - **What would prevent it:** only ingest from vetted sources, record provenance and trust level in metadata, check
   documents for suspicious content before they are indexed, separate collections by tenant and sensitivity, and be able
   to purge and rebuild the index.
@@ -110,7 +112,7 @@ chunk in both modes, so one ingest serves both; only secure mode acts on the lab
 | LLM02 | Every chunk is labeled at ingest by folder: `data/` is public, `data/internal/` is internal, everything else (including `data/untrusted/` and files from outside `DATA_DIR`) is untrusted. In secure mode `retrieve()` searches public, unflagged chunks only: the default caller has no clearance. | `defenses.classify_sensitivity()`, `defenses.retrieval_filter()`, `ingest.py`, `retriever.py` |
 | LLM09 | The same filter keeps untrusted documents out of retrieval, so the poisoned return-policy update never competes with the real one. An ingest-time screen (issue #12) also flags documents that address an AI system, and flagged documents are quarantined the same way. | `defenses.find_suspicious_lines()`, `ingest.py` |
 | LLM01 | Retrieved chunks are fenced in `<document>` tags (tag-like text inside a chunk is defused first), and the system message says text in the tags is data, never instructions. An output check then removes any payload that a flagged document asked the model to say. | `defenses.fence_document()`, `rag.build_messages()`, `defenses.strip_payloads()` |
-| LLM08 | The instructions are sent as a separate system-role message, and the answer is refused if it repeats any six consecutive words of them. | `rag.build_messages()`, `defenses.leaks_instructions()` |
+| LLM08 | The instructions are sent as a separate system-role message, and the answer is refused if it repeats any six consecutive words of them. The sentence the model is told to say ("If the answer is not in the context, say you don't know.") is exempt, so honest answers are not refused. | `rag.build_messages()`, `defenses.leaks_instructions()` |
 
 ### What each layer did against llama3.1:8b
 
