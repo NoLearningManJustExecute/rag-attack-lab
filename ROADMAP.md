@@ -11,7 +11,7 @@ Status key: Done / In progress / Planned
 | v1.0 | Documented vulnerable target | Done |
 | v1.1 | Minimal web UI | Planned |
 | v2.0 | Attack and findings | Done |
-| v3.0 | Fix and measured retest | In progress |
+| v3.0 | Fix and measured retest | Done |
 | v4.0 | Automated red-team checks in CI | Planned |
 | v5.0 | Pentest report and publication | Planned |
 
@@ -50,10 +50,12 @@ The baseline is changed on purpose so it can be attacked in later phases. Every 
 - Findings show real impact, not cosmetic model behavior
 - `rag-lab attack` runs the four cases; a real run against llama3.1:8b triggered all four (`findings/`)
 
-## v3.0 — Fix and measured retest (In progress)
+## v3.0 — Fix and measured retest (Done)
 
 - Fix each finding, behind a `SECURE_MODE` flag so one harness shows the before and the after (done)
-- Evaluation runner that outputs JSON metrics before and after the fixes: attack-block rate, benign-block rate (false positives), and accuracy
+- Evaluation runner that outputs JSON metrics before and after the fixes: attack-block rate, benign-block rate (false positives), and accuracy (done: `rag-lab eval` writes `findings/metrics.json`)
+- Retest evidence committed: 4/4 attacks triggered before, 0/4 after, and 8/8 benign questions still answered (done:
+  `findings/retest.md`)
 - Ingest-time checks for suspicious documents, with the ability to purge and rebuild the index (done: flagged and
   untrusted documents are quarantined from retrieval; `reset` then `ingest` rebuilds the index)
 - New tests confirm each fix in secure mode, while the v1.0 weakness tests keep passing in the default mode (done)

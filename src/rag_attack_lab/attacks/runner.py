@@ -46,7 +46,8 @@ def render_markdown(findings: list[Finding]) -> str:
     model = findings[0].model if findings else "unknown"
     stamp = findings[0].timestamp if findings else ""
     mode = "on (v3 fixes active)" if findings and findings[0].secure_mode else "off (vulnerable)"
-    lines = ["# Attack findings", "", f"Model: {model}", f"SECURE_MODE: {mode}", f"Run: {stamp}", ""]
+    title = "Retest findings" if findings and findings[0].secure_mode else "Attack findings"
+    lines = [f"# {title}", "", f"Model: {model}", f"SECURE_MODE: {mode}", f"Run: {stamp}", ""]
 
     lines += ["| Case | OWASP | Severity | Result |", "| --- | --- | --- | --- |"]
     for finding in findings:
@@ -99,11 +100,16 @@ def render_markdown(findings: list[Finding]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def write_findings(findings: list[Finding], out_dir: Path) -> list[Path]:
-    """Write findings.json (machine-readable) and findings.md (report-ready)."""
+def default_name(settings: Settings) -> str:
+    """findings for a vulnerable run, retest for a SECURE_MODE run, so a retest never overwrites the before."""
+    return "retest" if settings.secure_mode else "findings"
+
+
+def write_findings(findings: list[Finding], out_dir: Path, name: str = "findings") -> list[Path]:
+    """Write <name>.json (machine-readable) and <name>.md (report-ready)."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    json_path = out_dir / "findings.json"
-    md_path = out_dir / "findings.md"
+    json_path = out_dir / f"{name}.json"
+    md_path = out_dir / f"{name}.md"
     json_path.write_text(json.dumps([finding.to_dict() for finding in findings], indent=2) + "\n", encoding="utf-8")
     md_path.write_text(render_markdown(findings), encoding="utf-8")
     return [json_path, md_path]
