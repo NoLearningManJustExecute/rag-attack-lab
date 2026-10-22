@@ -19,6 +19,9 @@ on:
       - "LICENSE"
       - ".editorconfig"
       - ".gitignore"
+  # Weekly full run on main, the only run that tests Windows outside pull requests.
+  schedule:
+    - cron: "0 6 * * 1" # Mondays at 06:00 UTC
   workflow_dispatch:
 
 # Least privilege: jobs can read the repo and nothing else.
@@ -42,7 +45,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # Windows minutes cost twice as much as Linux minutes in a private repo, so Windows
+        # runs only on pull requests and the weekly schedule. Other runs test Ubuntu only.
+        os: ${{ fromJSON((github.event_name == 'pull_request' || github.event_name == 'schedule') && '["ubuntu-latest", "windows-latest"]' || '["ubuntu-latest"]') }}
     steps:
       # Actions are pinned to full commit SHAs. Dependabot keeps them updated.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
