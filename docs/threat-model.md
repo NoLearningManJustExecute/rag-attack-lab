@@ -77,7 +77,7 @@ checked against the ATLAS data release v2026.09.
 | The system prompt and retrieved context are repeated back to the user | LLM08 Hidden Context Exposure | AML.T0056 Extract LLM System Prompt | 1 | Keep nothing sensitive in the system prompt, send it as a system message, and filter answers that echo it. |
 | An untrusted or poisoned document is retrieved and treated like the company's own documents | LLM09 Vector and Embedding Weaknesses | AML.T0070 RAG Poisoning | 2 | Ingest only vetted sources, record provenance and trust in metadata, check documents before indexing, and isolate collections. |
 
-These one-line mitigations preview the fixes planned for v3.0, which will be retested and measured.
+These one-line mitigations preview the v3.0 fixes. What was built, and what each layer did and did not stop, is in [VULNERABILITIES.md](../VULNERABILITIES.md#fixes-v30-secure_mode).
 
 ## Residual notes
 

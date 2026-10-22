@@ -26,6 +26,12 @@ class Settings:
     chunk_overlap: int
     top_k: int
     llm_temperature: float
+    secure_mode: bool
+
+
+def env_flag(name: str, default: str = "false") -> bool:
+    """Read an on/off environment variable. 1, true, yes, and on (any case) mean on."""
+    return os.getenv(name, default).strip().lower() in {"1", "true", "yes", "on"}
 
 
 def load_settings() -> Settings:
@@ -46,4 +52,6 @@ def load_settings() -> Settings:
         chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "100")),
         top_k=int(os.getenv("TOP_K", "4")),
         llm_temperature=float(os.getenv("LLM_TEMPERATURE", "0")),
+        # Off by default: the lab is vulnerable unless you turn the v3 fixes on. See defenses.py.
+        secure_mode=env_flag("SECURE_MODE"),
     )
