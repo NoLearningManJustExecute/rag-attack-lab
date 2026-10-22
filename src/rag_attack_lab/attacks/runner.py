@@ -71,7 +71,7 @@ def render_markdown(findings: list[Finding]) -> str:
         lines += [
             f"- Target document retrieved: {'yes' if finding.detection.retrieved_target else 'no'}",
             "",
-            f"Why it works: {finding.case.rationale}",
+            f"{'Weakness (with SECURE_MODE off)' if finding.secure_mode else 'Why it works'}: {finding.case.rationale}",
             "",
             f"Impact: {finding.case.impact}",
             "",

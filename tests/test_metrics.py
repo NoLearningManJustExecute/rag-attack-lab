@@ -7,10 +7,21 @@ pipeline stubbed to answer like a vulnerable model with SECURE_MODE off and a fi
 import json
 from dataclasses import replace
 
+import pytest
+from typer.testing import CliRunner
+
 from rag_attack_lab.attacks import metrics, runner
 from rag_attack_lab.attacks.base import Detection, Finding
 from rag_attack_lab.attacks.cases import BENIGN_CASES, CASES, CASES_BY_ID
-from rag_attack_lab.attacks.metrics import BenignResult, compute_metrics, run_benign, run_eval, write_metrics
+from rag_attack_lab.attacks.metrics import (
+    BenignResult,
+    compute_metrics,
+    contains_fact,
+    run_benign,
+    run_eval,
+    write_metrics,
+)
+from rag_attack_lab.cli import app
 from rag_attack_lab.ingest import ingest
 from rag_attack_lab.rag import RagResult
 
@@ -66,6 +77,35 @@ def test_compute_metrics_reports_a_fix_that_did_not_hold():
     assert result["totals"]["after"]["attack_block_rate"] == 0.75
 
 
+def test_compute_metrics_rejects_mismatched_cases():
+    before = [make_finding(case, True) for case in CASES]
+    with pytest.raises(ValueError):
+        compute_metrics(before, before[:-1], [], [])
+    with pytest.raises(ValueError):
+        compute_metrics(before, before, [make_benign(BENIGN_CASES[0], True)], [])
+
+
+def test_compute_metrics_keeps_the_answers_as_evidence():
+    before = [make_finding(case, True) for case in CASES]
+    result = compute_metrics(before, before, [], [])
+    assert all("answer" in item["before"] and "raw_answer" in item["after"] for item in result["attacks"])
+
+
+@pytest.mark.parametrize(
+    ("answer", "expected", "found"),
+    [
+        ("You get 25 days.", "25", True),
+        ("You get 250 days.", "25", False),
+        ("Core hours start at 10:00.", "10", True),
+        ("It costs 100 dollars.", "10", False),
+        ("The plan is $49.", "$4", False),
+        ("Two-year warranty.", "two-year", True),
+    ],
+)
+def test_contains_fact_matches_whole_words(answer, expected, found):
+    assert contains_fact(answer, expected) is found
+
+
 def test_run_benign_scores_the_answer(monkeypatch, settings):
     case = BENIGN_CASES[0]  # vacation days: 25
     answers = {"right": "Full-time employees get 25 days.", "wrong": "I don't know."}
@@ -114,6 +154,37 @@ def test_run_eval_end_to_end_offline(settings, tmp_path):
     assert len(data["attacks"]) == len(CASES)
     assert len(data["benign"]) == len(BENIGN_CASES)
     assert data["totals"]["after"]["attacks_triggered"] == 0
+
+
+def test_eval_command_runs_both_modes_even_with_secure_mode_set(monkeypatch, settings, tmp_path):
+    # The env says SECURE_MODE=true; eval must still produce a before run with it off.
+    ingest(settings.data_dir, settings)
+    monkeypatch.setenv("SECURE_MODE", "true")
+    seen_modes = []
+    real_run_mode = metrics.run_mode
+
+    def recording_run_mode(mode_settings):
+        seen_modes.append(mode_settings.secure_mode)
+        return real_run_mode(mode_settings)
+
+    monkeypatch.setattr("rag_attack_lab.cli.load_settings", lambda: replace(settings, secure_mode=True))
+    monkeypatch.setattr(metrics, "run_mode", recording_run_mode)
+
+    result = CliRunner().invoke(app, ["eval", "--out", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    assert seen_modes == [False, True]
+    assert (tmp_path / "metrics.json").exists()
+
+
+def test_attack_command_names_output_by_mode(monkeypatch, settings, tmp_path):
+    ingest(settings.data_dir, settings)
+    monkeypatch.setattr("rag_attack_lab.cli.load_settings", lambda: replace(settings, secure_mode=True))
+
+    result = CliRunner().invoke(app, ["attack", "--out", str(tmp_path)])
+
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / "retest.json").exists() and not (tmp_path / "findings.json").exists()
 
 
 def test_attack_output_is_named_by_mode(settings, tmp_path):

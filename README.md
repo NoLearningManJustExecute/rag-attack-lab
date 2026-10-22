@@ -47,9 +47,9 @@ One attack harness, run against `llama3.1:8b` with the fixes off and on. Before 
 | Benign questions answered correctly | 8/8 | 8/8 |
 | Benign questions blocked by an output check (false positives) | 0/8 | 0/8 |
 
-The fixes are not equally strong. The LLM02 and LLM09 fixes are structural: retrieval filters on labels set at ingest, so internal and untrusted documents never reach the model. The LLM01 and LLM08 fixes are mitigations: on their own, the prompt changes still let the model leak 2 of 4 times (LLM01) or quote its instructions (LLM08), and text-matching output checks catch what is left. A reworded or translated attack could get past those checks. [VULNERABILITIES.md](VULNERABILITIES.md#fixes-v30-secure_mode) has the per-layer results and the limits.
+The fixes are not equally strong. The LLM02 and LLM09 fixes are structural: retrieval filters on labels set at ingest, so internal and untrusted documents never reach the model. The LLM01 and LLM08 fixes are mitigations: on their own, the prompt changes still let the model leak 2 of 4 times (LLM01) or quote its instructions (LLM08), and text-matching output checks catch what is left. A reworded or translated attack could get past those checks. In the committed retest, the LLM01 case passes because the newsletter is quarantined and never retrieved; the fencing and the output check were measured separately, with the quarantine bypassed. [VULNERABILITIES.md](VULNERABILITIES.md#fixes-v30-secure_mode) has the per-layer results and the limits.
 
-Evidence: [findings/findings.md](findings/findings.md) (before), [findings/retest.md](findings/retest.md) (after), and [findings/metrics.json](findings/metrics.json) (both runs, scored). Each one holds the model's own answers.
+Evidence: [findings/findings.md](findings/findings.md) (before), [findings/retest.md](findings/retest.md) (after), and [findings/metrics.json](findings/metrics.json) (both runs, scored). Each one holds the model's own answers. The before has no output checks, so its benign block rate is 0 by construction.
 
 ### How to reproduce
 
