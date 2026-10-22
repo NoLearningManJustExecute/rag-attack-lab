@@ -7,6 +7,20 @@ model.
 `demo.ps1` runs the sequence for you and pauses between steps so you can talk over it. The demo writes to
 `demo_output\` (git-ignored), never to `findings\`, so the committed evidence stays as it is.
 
+## Captured run
+
+![Preflight: llama3.1:8b and nomic-embed-text available locally](images/01-preflight.png)
+
+![Reset and ingest: 15 chunks from 7 documents, SECURE_MODE off](images/02-ingest.png)
+
+![Doctor: all five local checks pass; everything runs on localhost](images/03-doctor.png)
+
+![Attack, SECURE_MODE off: 4 of 4 triggered, with evidence](images/04-attack-vulnerable.png)
+
+![SECURE_MODE switched on](images/05-secure-mode-on.png)
+
+![Retest, SECURE_MODE on: 0 of 4 triggered](images/06-retest-secured.png)
+
 ## Before you record
 
 1. Ollama is running and has both models:

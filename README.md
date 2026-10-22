@@ -10,6 +10,12 @@ See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP
 
 [![CI](https://github.com/NoLearningManJustExecute/rag-attack-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/NoLearningManJustExecute/rag-attack-lab/actions/workflows/ci.yml)
 
+## Demo
+
+![The same four attacks against a local llama3.1:8b: all four succeed with SECURE_MODE off (top), all four fail with it on (bottom).](docs/demo/images/hero_before-after.png)
+
+Four attacks against a local `llama3.1:8b`: **4 of 4 succeed** against the vulnerable lab, **0 of 4** after the fixes, with everyday questions still answered correctly. Full step-by-step walkthrough and screenshots: [docs/demo](docs/demo/).
+
 ## What it does
 
 1. **Ingest:** loads `.txt` and `.pdf` files, splits them into chunks, embeds them with `nomic-embed-text` via Ollama, and stores them in a local Chroma database.
