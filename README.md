@@ -23,6 +23,37 @@ Four attacks against a local `llama3.1:8b`: **4 of 4 succeed** against the vulne
 
 The seed documents in `data/` describe a fictional company, Northwind Gadgets: an employee handbook, a product overview, and a customer FAQ. `data/internal/` holds fictional internal documents with canary secrets, and `data/untrusted/` holds two labeled teaching examples. All of them go into the same index.
 
+## Architecture
+
+```mermaid
+flowchart TD
+    subgraph ingest[Ingest]
+        D["data/ files<br/>public · internal · untrusted"] --> L["load"]
+        L --> CAN["fill canary secrets"]
+        CAN --> CH["chunk"]
+        CH --> VS[("Chroma<br/>one collection; labels stored, not enforced")]
+    end
+
+    Q["User question"] --> RET["retrieve top-k"]
+    VS --> RET
+    RET --> BP["build prompt<br/>system instructions + context + question"]
+    BP --> LLM["LLM (llama3.1:8b)"]
+    LLM --> ANS["Answer to user"]
+
+    Q -. "untrusted input (boundary 1)" .-> BP
+    D -. "untrusted content (boundary 2)" .-> BP
+
+    RET -.->|"no access control"| W02["LLM02 Sensitive Info Disclosure / AML.T0057"]
+    VS -.->|"untrusted ranked = trusted"| W09["LLM09 Vector &amp; Embedding Weaknesses / AML.T0070"]
+    BP -.->|"data concatenated as instructions"| W01["LLM01 Prompt Injection / AML.T0051.001"]
+    BP -.->|"system prompt in plain text"| W08["LLM08 Hidden Context Exposure / AML.T0056"]
+
+    classDef weakness fill:#fff0f0,stroke:#c0392b,color:#c0392b;
+    class W01,W02,W08,W09 weakness;
+```
+
+`SECURE_MODE=true` closes LLM02/LLM09 structurally (ingest labels + retrieval filter) and mitigates LLM01/LLM08 (prompt fencing, separate system role, output checks).
+
 ## Deliberately planted vulnerabilities
 
 Four weaknesses are planted on purpose and are on by default (`SECURE_MODE=false`). Each is mapped to the OWASP Top 10 for LLM Applications (2026) and MITRE ATLAS, and tagged in the code with a `# LLM0x:` comment.
