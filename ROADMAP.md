@@ -70,7 +70,8 @@ The baseline is changed on purpose so it can be attacked in later phases. Every 
 
 - PDF report: executive summary, scope, methodology, findings with severity and evidence, remediation, retest results
   (done: `docs/report/pentest-report.md` and `.pdf`)
-- Two-minute demo video or GIF
+- Two-minute demo video or GIF (script ready: `docs/demo/demo.ps1` runs the sequence from an empty store in about 75 seconds;
+  recording steps in `docs/demo/README.md`)
 - Write-up and public release
 
 ## Scope and ethics
