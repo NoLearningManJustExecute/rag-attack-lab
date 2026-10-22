@@ -1,0 +1,2 @@
+# Development and CI tools. Not needed to run the lab.
+pip-audit==2.10.1
