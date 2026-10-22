@@ -1,6 +1,6 @@
 # RAG Attack Lab
 
-A deliberately vulnerable RAG app for AI security education (same category as other intentionally vulnerable training applications).
+A deliberately vulnerable RAG app for AI security education: a safe, intentionally insecure teaching target.
 Local only. Fake data only.
 
 ## Hard rules
