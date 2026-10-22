@@ -13,7 +13,7 @@ Status key: Done / In progress / Planned
 | v2.0 | Attack and findings | Done |
 | v3.0 | Fix and measured retest | Done |
 | v4.0 | Automated red-team checks in CI | Planned |
-| v5.0 | Pentest report and publication | Planned |
+| v5.0 | Pentest report and publication | In progress |
 
 ## v0.1 — Clean RAG baseline (Done)
 
@@ -66,9 +66,10 @@ The baseline is changed on purpose so it can be attacked in later phases. Every 
 - Uses the offline fake provider so CI needs no model and no secrets
 - Tool choice (promptfoo, garak, or PyRIT) made after comparing current versions
 
-## v5.0 — Pentest report and publication (Planned)
+## v5.0 — Pentest report and publication (In progress)
 
 - PDF report: executive summary, scope, methodology, findings with severity and evidence, remediation, retest results
+  (done: `docs/report/pentest-report.md` and `.pdf`)
 - Two-minute demo video or GIF
 - Write-up and public release
 

@@ -24,8 +24,8 @@ CI runs all of these on every push to `main` and every pull request, except chan
 
 ```bash
 python -m pytest                 # offline tests
-ruff check src tests ci          # lint
-ruff format --check src tests ci # formatting
+ruff check src tests ci scripts          # lint
+ruff format --check src tests ci scripts # formatting
 pip-audit -r requirements.txt --ignore-vuln PYSEC-2026-311 --ignore-vuln PYSEC-2026-3813 --ignore-vuln PYSEC-2026-3814 --ignore-vuln PYSEC-2026-3815
 ```
 
