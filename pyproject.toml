@@ -19,3 +19,15 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, import sorting, bugbear, pyupgrade, implicit string concatenation
+select = ["E", "F", "W", "I", "B", "UP", "ISC"]
+
+[tool.ruff.lint.flake8-bugbear]
+# Typer declares CLI arguments as function defaults by design.
+extend-immutable-calls = ["typer.Argument", "typer.Option"]

@@ -6,14 +6,17 @@ from rag_attack_lab.rag import answer_question
 from rag_attack_lab.retriever import retrieve
 from rag_attack_lab.vectorstore import get_vector_store, reset_vector_store
 
+
 def make_minimal_pdf(text: str) -> bytes:
     """Build a valid one-page PDF showing `text`, so the test needs no PDF-writing library."""
     stream = f"BT /F1 18 Tf 20 70 Td ({text}) Tj ET".encode("ascii")
     objects = [
         b"<< /Type /Catalog /Pages 2 0 R >>",
         b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 144] /Contents 4 0 R"
-        b" /Resources << /Font << /F1 5 0 R >> >> >>",
+        (
+            b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 144] /Contents 4 0 R"
+            b" /Resources << /Font << /F1 5 0 R >> >> >>"
+        ),
         b"<< /Length %d >>\nstream\n" % len(stream) + stream + b"\nendstream",
         b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
     ]
