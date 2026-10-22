@@ -20,7 +20,9 @@ This folder holds the output of the attack harness (`rag-lab attack` and `rag-la
   their own. Retrieval runs with `SECURE_MODE` off so the quarantined newsletter still
   reaches the model, and each question is sent with the original prompt, the fenced
   prompt, and the fenced prompt plus the output check. It records how many answers
-  contained the injected sentence at each layer, with every answer.
+  contained the injected sentence at each layer, with every answer. It uses its own
+  throwaway store and canary file, so the canary value in it differs from the one in
+  `findings.json`.
 
 ## How to produce them
 

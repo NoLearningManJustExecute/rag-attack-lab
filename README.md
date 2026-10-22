@@ -4,7 +4,7 @@
 > **Local only.** Run it on your own machine. Never deploy it or expose it to a network.
 > **Fake data only.** Every document in this repo is invented. Never load real or sensitive data into it.
 
-**Status: v3.0 fixed and retested.** The RAG pipeline has four deliberately planted, documented weaknesses, an attack harness (`rag-lab attack`) that exploits them, and one fix per weakness behind `SECURE_MODE=true`. The pentest report and public release (v5.0) are next.
+**Status: v3.0 fixed and retested.** The RAG pipeline has four deliberately planted, documented weaknesses, an attack harness (`rag-lab attack`) that exploits them, and one fix per weakness behind `SECURE_MODE=true`. v5.0 in progress: the [pentest report](docs/report/pentest-report.md) is done; the demo and the public release are next.
 
 See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP.md](ROADMAP.md) for project phases, [CONTRIBUTING.md](CONTRIBUTING.md) to get set up, and [SECURITY.md](SECURITY.md) for the security policy.
 

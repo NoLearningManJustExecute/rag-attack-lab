@@ -26,6 +26,7 @@ from markdown_it import MarkdownIt
 
 SOURCE = Path("docs") / "report" / "pentest-report.md"
 TARGET = Path("docs") / "report" / "pentest-report.pdf"
+TITLE = "RAG Attack Lab: Penetration Test Report"
 
 # Usual install folders on Windows, checked after PATH.
 BROWSER_CANDIDATES = [
@@ -61,8 +62,10 @@ def find_browser(explicit: str | None) -> Path | None:
 
 
 def to_html(markdown: str) -> str:
-    body = MarkdownIt("commonmark").enable("table").render(markdown)
-    return f'<!doctype html><html><head><meta charset="utf-8"><style>{STYLE}</style></head><body>{body}</body></html>'
+    # html=False: raw HTML in the markdown is shown as text, so nothing in it can make the browser fetch a resource.
+    body = MarkdownIt("commonmark", {"html": False}).enable("table").render(markdown)
+    head = f'<meta charset="utf-8"><title>{TITLE}</title><style>{STYLE}</style>'
+    return f"<!doctype html><html><head>{head}</head><body>{body}</body></html>"
 
 
 def main() -> int:
@@ -75,24 +78,32 @@ def main() -> int:
         print("No Edge or Chrome found. Pass --browser, or export docs/report/pentest-report.md to PDF by hand.")
         return 1
 
-    TARGET.unlink(missing_ok=True)
     with tempfile.TemporaryDirectory(prefix="report-", ignore_cleanup_errors=True) as work_dir:
         html_path = Path(work_dir) / "pentest-report.html"
         html_path.write_text(to_html(SOURCE.read_text(encoding="utf-8")), encoding="utf-8")
+        # Print to a temporary file first, so a failed render never deletes the existing PDF.
+        draft = Path(work_dir) / "pentest-report.pdf"
         command = [
             str(browser),
             "--headless",
             "--disable-gpu",
             "--no-pdf-header-footer",
+            "--no-first-run",
+            "--disable-background-networking",
+            "--disable-component-update",
             f"--user-data-dir={Path(work_dir) / 'profile'}",
-            f"--print-to-pdf={TARGET.resolve()}",
+            f"--print-to-pdf={draft}",
             html_path.resolve().as_uri(),
         ]
-        subprocess.run(command, check=True, capture_output=True, timeout=120)
-        # Edge's launcher can return before the browser has written the file, so wait for it.
-        if not wait_for_file(TARGET):
-            print(f"The browser exited but {TARGET} was not written. Try --browser with Chrome.")
+        result = subprocess.run(command, capture_output=True, text=True, timeout=120)
+        if result.returncode != 0:
+            print(f"The browser failed (exit code {result.returncode}):\n{result.stderr}")
             return 1
+        # Edge's launcher can return before the browser has written the file, so wait for it.
+        if not wait_for_file(draft):
+            print(f"The browser exited but wrote no PDF. Try --browser with Chrome.\n{result.stderr}")
+            return 1
+        shutil.move(draft, TARGET)
 
     print(f"Wrote {TARGET} ({TARGET.stat().st_size} bytes)")
     return 0
