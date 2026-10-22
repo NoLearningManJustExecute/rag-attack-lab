@@ -1,0 +1,16 @@
+# Keep line endings consistent between Windows and Linux checkouts.
+# Git detects text files and stores them with LF in the repository.
+* text=auto
+
+# Source, docs, and config: always LF, even in a Windows working tree.
+*.py   text eol=lf
+*.md   text eol=lf
+*.txt  text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+
+# Windows scripts: always CRLF.
+*.bat  text eol=crlf
+*.ps1  text eol=crlf
