@@ -49,6 +49,9 @@ class Finding:
     retrieved: list[dict]
     model: str
     timestamp: str
+    secure_mode: bool = False
+    raw_answer: str = ""  # the model's own answer before any output check (same as answer when none fired)
+    guardrails: list[str] = field(default_factory=list)
 
     @property
     def triggered(self) -> bool:
@@ -75,4 +78,7 @@ class Finding:
             "retrieved": self.retrieved,
             "model": self.model,
             "timestamp": self.timestamp,
+            "secure_mode": self.secure_mode,
+            "raw_answer": self.raw_answer,
+            "guardrails": self.guardrails,
         }

@@ -10,6 +10,7 @@ from pypdf import PdfReader
 
 from rag_attack_lab.canaries import fill_canaries
 from rag_attack_lab.config import Settings
+from rag_attack_lab.defenses import classify_sensitivity, find_suspicious_lines
 from rag_attack_lab.vectorstore import get_vector_store
 
 SUPPORTED_EXTENSIONS = {".txt", ".pdf"}
@@ -70,12 +71,21 @@ def chunk_id(chunk: Document) -> str:
 
 def ingest(path: Path, settings: Settings) -> list[Document]:
     """Load, split, and store everything at `path`. Returns the chunks that were stored."""
-    # LLM09: every file found is trusted the same way. Nothing checks where it came from or what it says,
-    # and no trust or sensitivity label is recorded, so untrusted or poisoned documents go straight in.
-    # LLM02: internal documents (with their canaries) are stored next to the public ones.
+    # LLM09: every file found is stored in the same index, whatever its source, and poisoned
+    # documents go straight in. LLM02: internal documents (with their canaries) are stored next to
+    # the public ones. The labels below are recorded in every mode, but only SECURE_MODE acts on
+    # them (see retriever.py), so with it off they change nothing.
     documents: list[Document] = []
     for file in find_files(path):
-        documents.extend(load_file(file))
+        file_documents = load_file(file)
+        # LLM02/LLM09 fix (labels): where the file sits decides its sensitivity, and the
+        # suspicious-content screen (issue #12) flags text that addresses an AI system.
+        sensitivity = classify_sensitivity(file, settings.data_dir)
+        suspicious = any(find_suspicious_lines(document.page_content) for document in file_documents)
+        for document in file_documents:
+            document.metadata["sensitivity"] = sensitivity
+            document.metadata["suspicious"] = suspicious
+        documents.extend(file_documents)
 
     # Swap canary placeholders for their generated values before the text is chunked and stored.
     for document in documents:

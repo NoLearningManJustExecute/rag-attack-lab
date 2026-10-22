@@ -4,7 +4,7 @@
 > **Local only.** Run it on your own machine. Never deploy it or expose it to a network.
 > **Fake data only.** Every document in this repo is invented. Never load real or sensitive data into it.
 
-**Status: v1.0 vulnerable target (in progress).** The RAG pipeline now has four deliberately planted, documented weaknesses. Attack exercises land in v2.0 and fixes in v3.0.
+**Status: v3.0 fixes (in progress).** The RAG pipeline has four deliberately planted, documented weaknesses, an attack harness (`rag-lab attack`) that exploits them, and one fix per weakness behind `SECURE_MODE=true`.
 
 See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP.md](ROADMAP.md) for project phases, [CONTRIBUTING.md](CONTRIBUTING.md) to get set up, and [SECURITY.md](SECURITY.md) for the security policy.
 
@@ -19,7 +19,7 @@ The seed documents in `data/` describe a fictional company, Northwind Gadgets: a
 
 ## Deliberately planted vulnerabilities
 
-Four weaknesses are planted on purpose and are always on. Each is mapped to the OWASP Top 10 for LLM Applications (2026) and MITRE ATLAS, and tagged in the code with a `# LLM0x:` comment.
+Four weaknesses are planted on purpose and are on by default (`SECURE_MODE=false`). Each is mapped to the OWASP Top 10 for LLM Applications (2026) and MITRE ATLAS, and tagged in the code with a `# LLM0x:` comment.
 
 - **LLM01 Prompt Injection** (ATLAS AML.T0051, .000 Direct and .001 Indirect): the question and retrieved document text are pasted into the prompt with no separation of instructions from data.
 - **LLM02 Sensitive Information Disclosure** (ATLAS AML.T0057 LLM Data Leakage): internal documents with canary secrets share the index with public ones, and retrieval has no access control.
@@ -78,6 +78,7 @@ All settings come from environment variables. Defaults live in `src/rag_attack_l
 | `CHUNK_SIZE` / `CHUNK_OVERLAP` | `800` / `100` | Chunking, in characters |
 | `TOP_K` | `4` | How many chunks to retrieve |
 | `LLM_TEMPERATURE` | `0` | Sampling temperature |
+| `SECURE_MODE` | `false` | `true` turns on the v3 fixes, one per planted weakness (see [VULNERABILITIES.md](VULNERABILITIES.md#fixes-v30-secure_mode)) |
 
 The Anthropic provider is optional. It only needs `langchain-anthropic` (included in `requirements.txt`) and an API key. Note that using it sends your prompts, including retrieved document text, to an external API, so the lab is no longer fully local.
 
@@ -155,7 +156,9 @@ src/rag_attack_lab/
   ingest.py       load TXT/PDF, chunk, store
   retriever.py    top-k search with source metadata
   rag.py          retrieve, build prompt, generate
-  cli.py          ingest / ask / reset / doctor commands
+  defenses.py     the v3 fixes, active only when SECURE_MODE is on
+  attacks/        the attack harness: cases, detectors, runner
+  cli.py          ingest / ask / attack / reset / doctor commands
 data/             fictional seed documents
   internal/       fictional internal documents with canary placeholders
   untrusted/      labeled teaching examples (injection, poisoning)
