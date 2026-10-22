@@ -4,7 +4,7 @@
 > **Local only.** Run it on your own machine. Never deploy it or expose it to a network.
 > **Fake data only.** Every document in this repo is invented. Never load real or sensitive data into it.
 
-**Status: v3.0 fixed and retested.** The RAG pipeline has four deliberately planted, documented weaknesses, an attack harness (`rag-lab attack`) that exploits them, and one fix per weakness behind `SECURE_MODE=true`. The pentest report and public release (v5.0) are next.
+**Status: v3.0 fixed and retested.** The RAG pipeline has four deliberately planted, documented weaknesses, an attack harness (`rag-lab attack`) that exploits them, and one fix per weakness behind `SECURE_MODE=true`. v5.0 in progress: the [pentest report](docs/report/pentest-report.md) is done; the demo and the public release are next.
 
 See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP.md](ROADMAP.md) for project phases, [CONTRIBUTING.md](CONTRIBUTING.md) to get set up, and [SECURITY.md](SECURITY.md) for the security policy.
 
@@ -69,6 +69,12 @@ rag-lab eval
 ```
 
 Model answers can vary between machines and model builds, even at temperature 0. The verdicts above are from the committed run.
+
+To test the LLM01 layers on their own (quarantine bypassed, so the newsletter reaches the model), run `python scripts\llm01_layers.py`. It writes `findings\llm01-layers.json`; the committed run found the injected sentence in 4 of 4 answers with the original prompt, 2 of 4 with fencing alone, and 0 of 4 with fencing plus the output check.
+
+### Pentest report
+
+The full write-up is [docs/report/pentest-report.md](docs/report/pentest-report.md), with a PDF copy at [docs/report/pentest-report.pdf](docs/report/pentest-report.pdf): executive summary, scope, methodology, the four findings with the model's own answers as evidence, retest, metrics, residual risk, and the framework mapping. To rebuild the PDF after editing the markdown, run `python scripts\render_report.py` (it prints with a local Edge or Chrome in headless mode; nothing is fetched from the network).
 
 ## Requirements
 
@@ -164,7 +170,7 @@ Lint and dependency checks use the tools pinned in `requirements-dev.txt`:
 
 ```powershell
 pip install -r requirements-dev.txt
-ruff check src tests
+ruff check src tests ci scripts
 pip-audit -r requirements.txt --ignore-vuln PYSEC-2026-311 --ignore-vuln PYSEC-2026-3813 --ignore-vuln PYSEC-2026-3814 --ignore-vuln PYSEC-2026-3815
 ```
 
@@ -208,8 +214,10 @@ src/rag_attack_lab/
 data/             fictional seed documents
   internal/       fictional internal documents with canary placeholders
   untrusted/      labeled teaching examples (injection, poisoning)
-docs/             overview, threat model, report outline
+docs/             overview, threat model, pentest report
 tests/            offline tests
+scripts/          the LLM01 layer test and the report renderer
+findings/         attack evidence: before, retest, metrics, LLM01 layers
 VULNERABILITIES.md  the planted weaknesses
 ```
 
