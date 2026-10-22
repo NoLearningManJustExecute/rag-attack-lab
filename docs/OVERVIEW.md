@@ -62,7 +62,7 @@ The repository is built to the standard a reviewer expects:
 
 - Pinned dependencies and a documented, reproducible setup.
 - Offline tests that need no model, no network, and no secrets.
-- Continuous integration on every push and pull request: tests on Linux and Windows, linting, formatting, a dependency vulnerability audit, and the offline red-team harness.
+- Continuous integration on every push and pull request that changes more than docs: tests on Linux (and on Windows for pull requests and a weekly run), linting, formatting, a dependency vulnerability audit, and the offline red-team harness.
 - GitHub Actions pinned to exact commits, least-privilege tokens, and automated dependency updates.
 - A security policy, a contribution guide, and decision records for notable choices.
 - Known, reviewed dependency advisories are documented rather than hidden.
