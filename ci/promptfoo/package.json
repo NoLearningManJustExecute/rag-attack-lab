@@ -6,6 +6,6 @@
     "eval": "promptfoo eval -c promptfooconfig.yaml --no-cache -j 1"
   },
   "devDependencies": {
-    "promptfoo": "0.124.1"
+    "promptfoo": "0.125.1"
   }
 }
