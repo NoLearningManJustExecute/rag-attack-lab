@@ -22,7 +22,7 @@ PROMPTFOO_PYTHON=python npm run eval
 
 promptfoo pulls in three transitive packages with open high-severity advisories and **no
 fix reachable without a breaking major-version bump** as of the pin below. They are
-accepted, not fixed, for the reasons here. These are development/CI tooling only — the lab
+accepted, not fixed, for the reasons here. These are development/CI tooling only; the lab
 itself is Python and ships none of them.
 
 | Package | Version | GHSA | Issue |
