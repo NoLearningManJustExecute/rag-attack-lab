@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 
 from rag_attack_lab import doctor
 from rag_attack_lab.cli import app
-from rag_attack_lab.doctor import FAIL, PASS, SKIP, check_ollama, check_providers, check_vector_store
+from rag_attack_lab.doctor import FAIL, PASS, SKIP, check_ollama, check_providers, check_vector_store, shown_path
 from rag_attack_lab.ingest import ingest
 
 
@@ -113,3 +113,31 @@ def test_doctor_command_exit_code(settings, monkeypatch, no_ollama):
     assert before_ingest.exit_code == 1, before_ingest.output
     assert after_ingest.exit_code == 0, after_ingest.output
     assert "All checks passed." in after_ingest.output
+
+
+def test_doctor_never_prints_absolute_paths(settings, monkeypatch, no_ollama, tmp_path):
+    project = tmp_path / "project"
+    (project / "data").mkdir(parents=True)
+    monkeypatch.chdir(project)
+    assert shown_path(project / "data" / "x.txt") == "data/x.txt"
+    assert shown_path(tmp_path / "elsewhere" / "store") == "<outside project>/store"
+
+    for name, value in {
+        "LLM_PROVIDER": "fake",
+        "EMBEDDING_PROVIDER": "fake",
+        "CHROMA_DIR": str(settings.chroma_dir),
+        "DATA_DIR": str(project / "data"),
+        # Wide enough that Rich never wraps or truncates a path, so a leak would show in full.
+        "COLUMNS": "400",
+    }.items():
+        monkeypatch.setenv(name, value)
+    output = CliRunner().invoke(app, ["doctor"]).output
+    lines = output.splitlines()
+
+    settings_rows = [line for line in lines if "chroma_dir" in line or "data_dir" in line]
+    assert any("chroma_dir" in row and "<outside project>/chroma_db" in row for row in settings_rows)
+    assert any("data_dir" in row and " data " in row for row in settings_rows)
+    store_rows = [line for line in lines if "Chroma store" in line]
+    assert store_rows and all("<outside project>/chroma_db" in row for row in store_rows)
+    assert str(tmp_path) not in output
+    assert tmp_path.as_posix() not in output

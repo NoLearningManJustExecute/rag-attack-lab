@@ -8,6 +8,7 @@ never needs a running model.
 import json
 import urllib.request
 from dataclasses import dataclass
+from pathlib import Path
 
 from rag_attack_lab.config import Settings
 from rag_attack_lab.vectorstore import get_vector_store
@@ -85,13 +86,25 @@ def check_ollama(settings: Settings) -> list[CheckResult]:
     return results
 
 
+def shown_path(path: Path) -> str:
+    """A path as doctor prints it: relative to the working directory, or just its name.
+
+    Doctor output ends up in screenshots and logs, so it never shows an absolute local path.
+    """
+    try:
+        return path.resolve().relative_to(Path.cwd().resolve()).as_posix()
+    except ValueError:
+        return f"<outside project>/{path.name}"
+
+
 def check_vector_store(settings: Settings) -> CheckResult:
     """Check that the Chroma store exists on disk and holds at least one chunk."""
     if not settings.chroma_dir.exists():
-        return CheckResult("Chroma store", FAIL, f"{settings.chroma_dir} does not exist. Run: rag-lab ingest")
+        location = shown_path(settings.chroma_dir)
+        return CheckResult("Chroma store", FAIL, f"{location} does not exist. Run: rag-lab ingest")
 
     chunk_count = len(get_vector_store(settings).get()["ids"])
-    location = f"{settings.chroma_dir} (collection {settings.chroma_collection!r})"
+    location = f"{shown_path(settings.chroma_dir)} (collection {settings.chroma_collection!r})"
     if chunk_count == 0:
         return CheckResult("Chroma store", FAIL, f"{location} is empty. Run: rag-lab ingest")
     return CheckResult("Chroma store", PASS, f"{location}: {chunk_count} chunks")

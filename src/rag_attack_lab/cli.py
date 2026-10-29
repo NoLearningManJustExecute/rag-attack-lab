@@ -12,7 +12,7 @@ from rag_attack_lab.attacks.cases import CASES_BY_ID
 from rag_attack_lab.attacks.metrics import run_eval, write_metrics
 from rag_attack_lab.attacks.runner import default_name, run_all, run_attack, write_findings
 from rag_attack_lab.config import Settings, load_settings
-from rag_attack_lab.doctor import FAIL, PASS, run_checks
+from rag_attack_lab.doctor import FAIL, PASS, run_checks, shown_path
 from rag_attack_lab.ingest import ingest as ingest_path
 from rag_attack_lab.providers import describe_model
 from rag_attack_lab.rag import answer_question
@@ -181,11 +181,13 @@ def doctor() -> None:
     settings = load_settings()
 
     # Settings holds no secrets (API keys are read straight from the environment), so all of it is safe to print.
+    # Paths are shown relative to the working directory, never as absolute local paths.
     settings_table = Table(title="Active settings")
     settings_table.add_column("Setting")
     settings_table.add_column("Value")
     for field in fields(settings):
-        settings_table.add_row(field.name, str(getattr(settings, field.name)))
+        value = getattr(settings, field.name)
+        settings_table.add_row(field.name, shown_path(value) if isinstance(value, Path) else str(value))
     console.print(settings_table)
 
     results = run_checks(settings)
