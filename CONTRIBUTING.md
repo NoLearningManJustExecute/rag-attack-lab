@@ -46,7 +46,7 @@ PROMPTFOO_PYTHON=python npm run eval
 `tools/leak_guard.py` blocks personal data, absolute local paths and secrets in the tree, the history, pull request text and committed findings. How it works, the history baseline and the CI layout are in [tools/LEAK_GUARD.md](tools/LEAK_GUARD.md).
 
 - Hooks: `.githooks/pre-commit` runs `--tree`, `.githooks/pre-push` runs `--all`.
-- The private identifier list is never committed. Point the guard at your local copy with the `LEAK_DENYLIST_FILE` environment variable; CI reads it from the `LEAK_DENYLIST` secret.
+- The private identifier list is never committed. The guard finds your local copy in a `_planning` folder above the clone, or point it there once per clone with `git config leakguard.denylist <path to the list>` (or the `LEAK_DENYLIST_FILE` environment variable). Without a list the hooks print a boxed warning. CI reads it from the `LEAK_DENYLIST` secret.
 - The `Leak guard` workflow has no path filters, so it also runs on doc-only changes.
 - Screenshots: run `python tools/leak_guard.py --strip-png FILE` before committing a PNG, and check it by eye for usernames, paths, window titles and emails.
 

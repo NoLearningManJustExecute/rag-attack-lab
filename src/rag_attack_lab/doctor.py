@@ -86,15 +86,37 @@ def check_ollama(settings: Settings) -> list[CheckResult]:
     return results
 
 
-def shown_path(path: Path) -> str:
-    """A path as doctor prints it: relative to the working directory, or just its name.
+OUTSIDE_PROJECT = "<outside project>"
 
-    Doctor output ends up in screenshots and logs, so it never shows an absolute local path.
+
+def project_root() -> Path | None:
+    """The project the CLI runs in: the nearest folder at or above the working directory that
+    holds a pyproject.toml, or None outside any project.
+
+    Only pyproject.toml counts. A .git folder alone can be a home folder kept under version
+    control, and paths relative to that would still show private folder names.
     """
+    cwd = Path.cwd().resolve()
+    for folder in (cwd, *cwd.parents):
+        if (folder / "pyproject.toml").is_file():
+            return folder
+    return None
+
+
+def shown_path(path: Path) -> str:
+    """A path as the CLI prints it: relative to the repository, or withheld entirely.
+
+    CLI output ends up in screenshots and logs, so it never shows an absolute local path. A path
+    outside the repository shows no part of itself, since any folder or file name in it could be a
+    user name.
+    """
+    root = project_root()
+    if root is None:
+        return OUTSIDE_PROJECT
     try:
-        return path.resolve().relative_to(Path.cwd().resolve()).as_posix()
+        return path.resolve().relative_to(root).as_posix()
     except ValueError:
-        return f"<outside project>/{path.name}"
+        return OUTSIDE_PROJECT
 
 
 def check_vector_store(settings: Settings) -> CheckResult:

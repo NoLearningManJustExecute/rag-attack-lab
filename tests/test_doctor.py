@@ -1,6 +1,7 @@
 """Offline tests for `rag-lab doctor`. Ollama is never contacted: calls to it are replaced in each test."""
 
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
@@ -118,9 +119,10 @@ def test_doctor_command_exit_code(settings, monkeypatch, no_ollama):
 def test_doctor_never_prints_absolute_paths(settings, monkeypatch, no_ollama, tmp_path):
     project = tmp_path / "project"
     (project / "data").mkdir(parents=True)
+    (project / "pyproject.toml").write_text("[project]" + chr(10), encoding="utf-8")
     monkeypatch.chdir(project)
     assert shown_path(project / "data" / "x.txt") == "data/x.txt"
-    assert shown_path(tmp_path / "elsewhere" / "store") == "<outside project>/store"
+    assert shown_path(tmp_path / "elsewhere" / "store") == "<outside project>"
 
     for name, value in {
         "LLM_PROVIDER": "fake",
@@ -135,9 +137,32 @@ def test_doctor_never_prints_absolute_paths(settings, monkeypatch, no_ollama, tm
     lines = output.splitlines()
 
     settings_rows = [line for line in lines if "chroma_dir" in line or "data_dir" in line]
-    assert any("chroma_dir" in row and "<outside project>/chroma_db" in row for row in settings_rows)
+    assert any("chroma_dir" in row and "<outside project>" in row for row in settings_rows)
     assert any("data_dir" in row and " data " in row for row in settings_rows)
     store_rows = [line for line in lines if "Chroma store" in line]
-    assert store_rows and all("<outside project>/chroma_db" in row for row in store_rows)
+    assert store_rows and all("<outside project>" in row for row in store_rows)
+    assert "chroma_db" not in "".join(store_rows)
     assert str(tmp_path) not in output
     assert tmp_path.as_posix() not in output
+
+
+def test_shown_path_is_relative_to_the_repository_root(monkeypatch, tmp_path):
+    repo = tmp_path / "repo"
+    (repo / "src" / "pkg").mkdir(parents=True)
+    (repo / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+    monkeypatch.chdir(repo / "src" / "pkg")
+    assert shown_path(repo / "findings" / "x.json") == "findings/x.json"
+    assert shown_path(Path("local.txt")) == "src/pkg/local.txt"
+    assert shown_path(tmp_path / "private_folder" / "y.json") == "<outside project>"
+
+    # Outside any project, even paths under the working directory are withheld.
+    loose = tmp_path / "loose"
+    loose.mkdir()
+    monkeypatch.chdir(loose)
+    assert shown_path(loose / "a" / "b.txt") == "<outside project>"
+
+    # A .git folder alone (a home folder under version control) is not a project.
+    home = tmp_path / "home"
+    (home / ".git").mkdir(parents=True)
+    monkeypatch.chdir(home)
+    assert shown_path(home / "private_folder" / "c.txt") == "<outside project>"

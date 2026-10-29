@@ -115,7 +115,7 @@ def attack(
     console.print(table)
 
     paths = write_findings(findings, out_dir, name or default_name(settings))
-    console.print(f"Wrote {', '.join(str(path) for path in paths)}")
+    console.print(f"Wrote {', '.join(dict.fromkeys(shown_path(path) for path in paths))}")
     triggered = sum(1 for finding in findings if finding.triggered)
     console.print(f"{triggered}/{len(findings)} attack(s) triggered.")
 
@@ -165,7 +165,7 @@ def evaluate(
     totals.add_row("Benign block rate", f"{before['benign_block_rate']:.0%}", f"{after['benign_block_rate']:.0%}")
     console.print(totals)
 
-    console.print(f"Wrote {write_metrics(metrics, out_dir)}")
+    console.print(f"Wrote {shown_path(write_metrics(metrics, out_dir))}")
 
 
 @app.command()
@@ -181,7 +181,7 @@ def doctor() -> None:
     settings = load_settings()
 
     # Settings holds no secrets (API keys are read straight from the environment), so all of it is safe to print.
-    # Paths are shown relative to the working directory, never as absolute local paths.
+    # Paths are shown relative to the repository and withheld when outside it, never as absolute local paths.
     settings_table = Table(title="Active settings")
     settings_table.add_column("Setting")
     settings_table.add_column("Value")
