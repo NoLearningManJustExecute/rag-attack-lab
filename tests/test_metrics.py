@@ -198,3 +198,28 @@ def test_attack_output_is_named_by_mode(settings, tmp_path):
     markdown = md_path.read_text(encoding="utf-8")
     assert markdown.startswith("# Retest findings")
     assert "SECURE_MODE: on" in markdown
+
+
+def test_wrote_lines_never_print_an_absolute_out_folder(monkeypatch, settings, tmp_path):
+    ingest(settings.data_dir, settings)
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+    monkeypatch.chdir(project)
+    monkeypatch.setenv("COLUMNS", "400")
+    monkeypatch.setattr("rag_attack_lab.cli.load_settings", lambda: settings)
+    outside = tmp_path / "private_folder"
+
+    for command in (["attack"], ["eval"]):
+        result = CliRunner().invoke(app, [*command, "--out", str(outside)])
+        assert result.exit_code == 0, result.output
+        wrote = [line for line in result.output.splitlines() if line.startswith("Wrote ")]
+        assert wrote == ["Wrote <outside project>"]
+        assert "private_folder" not in result.output
+        assert str(tmp_path) not in result.output and tmp_path.as_posix() not in result.output
+
+    inside = project / "out"
+    result = CliRunner().invoke(app, ["attack", "--out", str(inside)])
+    assert "Wrote out/findings.json, out/findings.md" in result.output
+    result = CliRunner().invoke(app, ["eval", "--out", str(inside)])
+    assert "Wrote out/metrics.json" in result.output
