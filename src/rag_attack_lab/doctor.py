@@ -89,14 +89,18 @@ def check_ollama(settings: Settings) -> list[CheckResult]:
 OUTSIDE_PROJECT = "<outside project>"
 
 
-def project_root() -> Path:
-    """The repository the CLI runs in: the nearest folder at or above the working directory that
-    holds a pyproject.toml or a .git entry, else the working directory itself."""
+def project_root() -> Path | None:
+    """The project the CLI runs in: the nearest folder at or above the working directory that
+    holds a pyproject.toml, or None outside any project.
+
+    Only pyproject.toml counts. A .git folder alone can be a home folder kept under version
+    control, and paths relative to that would still show private folder names.
+    """
     cwd = Path.cwd().resolve()
     for folder in (cwd, *cwd.parents):
-        if (folder / "pyproject.toml").is_file() or (folder / ".git").exists():
+        if (folder / "pyproject.toml").is_file():
             return folder
-    return cwd
+    return None
 
 
 def shown_path(path: Path) -> str:
@@ -106,8 +110,11 @@ def shown_path(path: Path) -> str:
     outside the repository shows no part of itself, since any folder or file name in it could be a
     user name.
     """
+    root = project_root()
+    if root is None:
+        return OUTSIDE_PROJECT
     try:
-        return path.resolve().relative_to(project_root()).as_posix()
+        return path.resolve().relative_to(root).as_posix()
     except ValueError:
         return OUTSIDE_PROJECT
 

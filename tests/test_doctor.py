@@ -119,6 +119,7 @@ def test_doctor_command_exit_code(settings, monkeypatch, no_ollama):
 def test_doctor_never_prints_absolute_paths(settings, monkeypatch, no_ollama, tmp_path):
     project = tmp_path / "project"
     (project / "data").mkdir(parents=True)
+    (project / "pyproject.toml").write_text("[project]" + chr(10), encoding="utf-8")
     monkeypatch.chdir(project)
     assert shown_path(project / "data" / "x.txt") == "data/x.txt"
     assert shown_path(tmp_path / "elsewhere" / "store") == "<outside project>"
@@ -154,7 +155,14 @@ def test_shown_path_is_relative_to_the_repository_root(monkeypatch, tmp_path):
     assert shown_path(Path("local.txt")) == "src/pkg/local.txt"
     assert shown_path(tmp_path / "private_folder" / "y.json") == "<outside project>"
 
+    # Outside any project, even paths under the working directory are withheld.
     loose = tmp_path / "loose"
     loose.mkdir()
     monkeypatch.chdir(loose)
-    assert shown_path(loose / "a" / "b.txt") == "a/b.txt"
+    assert shown_path(loose / "a" / "b.txt") == "<outside project>"
+
+    # A .git folder alone (a home folder under version control) is not a project.
+    home = tmp_path / "home"
+    (home / ".git").mkdir(parents=True)
+    monkeypatch.chdir(home)
+    assert shown_path(home / "private_folder" / "c.txt") == "<outside project>"
