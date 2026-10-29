@@ -14,7 +14,10 @@ python -m venv .venv
 # macOS/Linux:        source .venv/bin/activate
 pip install -r requirements.txt -r requirements-dev.txt
 pip install -e .
+git config core.hooksPath .githooks
 ```
+
+The last line turns on the repository's git hooks for your clone. Run it once.
 
 To run the lab against a real model, install [Ollama](https://ollama.com), pull `llama3.1:8b` and `nomic-embed-text`, then `rag-lab ingest` and `rag-lab ask "..."`. See the [README](README.md) for details.
 
@@ -24,8 +27,9 @@ CI runs all of these on every push to `main` and every pull request, except chan
 
 ```bash
 python -m pytest                 # offline tests
-ruff check src tests ci scripts          # lint
-ruff format --check src tests ci scripts # formatting
+ruff check src tests ci scripts tools          # lint
+ruff format --check src tests ci scripts tools # formatting
+python tools/leak_guard.py --all                # personal data, local paths, secrets
 pip-audit -r requirements.txt --ignore-vuln PYSEC-2026-311 --ignore-vuln PYSEC-2026-3813 --ignore-vuln PYSEC-2026-3814 --ignore-vuln PYSEC-2026-3815
 ```
 
@@ -36,6 +40,15 @@ cd ci/promptfoo
 npm ci
 PROMPTFOO_PYTHON=python npm run eval
 ```
+
+## Leak guard
+
+`tools/leak_guard.py` blocks personal data, absolute local paths and secrets in the tree, the history, pull request text and committed findings. How it works, the history baseline and the CI layout are in [tools/LEAK_GUARD.md](tools/LEAK_GUARD.md).
+
+- Hooks: `.githooks/pre-commit` runs `--tree`, `.githooks/pre-push` runs `--all`.
+- The private identifier list is never committed. Point the guard at your local copy with the `LEAK_DENYLIST_FILE` environment variable; CI reads it from the `LEAK_DENYLIST` secret.
+- The `Leak guard` workflow has no path filters, so it also runs on doc-only changes.
+- Screenshots: run `python tools/leak_guard.py --strip-png FILE` before committing a PNG, and check it by eye for usernames, paths, window titles and emails.
 
 ## How the code is organized
 
