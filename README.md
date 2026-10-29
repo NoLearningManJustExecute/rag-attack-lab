@@ -1,3 +1,5 @@
+![rag-attack-lab: an ordinary question leaks a planted canary password, then is blocked with SECURE_MODE on](docs/assets/demo-banner.svg)
+
 # RAG Attack Lab
 
 > **Vulnerable by design.** This is a deliberately insecure RAG application for AI security education, in the same spirit as other intentionally vulnerable training applications.
@@ -5,6 +7,8 @@
 > **Fake data only.** Every document in this repo is invented. Never load real or sensitive data into it.
 
 **Status: attacked, fixed, retested, and written up.** Four deliberately planted, documented weaknesses; an attack harness (`rag-lab attack`) that exploits them; one fix per weakness behind `SECURE_MODE=true`; a measured retest (4/4 attacks before, 0/4 after, no benign answers lost); a [pentest report](docs/report/pentest-report.md); and a [two-minute demo script](docs/demo/README.md). Results are [below](#results-before-and-after-the-fixes).
+
+Live demo: https://NoLearningManJustExecute.github.io/rag-attack-lab/
 
 See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP.md](ROADMAP.md) for project phases, [CONTRIBUTING.md](CONTRIBUTING.md) to get set up, and [SECURITY.md](SECURITY.md) for the security policy.
 
