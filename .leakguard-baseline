@@ -1,0 +1,35 @@
+# Leak guard history baseline. Fingerprints only: <commit> <rule> <line> <path>.
+# Covers commits at or before the cutoff, which must be on the default branch. Never the working
+# tree, never private list hits, never email addresses. Range scans read this file from the range
+# base, so a change cannot approve itself. Every entry was confirmed as a false positive.
+#
+# dash-character: typographic dashes in prose (ROADMAP headings, promptfoo README).
+# forbidden-domain, generated-footer: CLAUDE.md rule text that names the strings it forbids.
+# image-metadata: C2PA content credentials in earlier PNG versions (vendor provenance, no
+#   personal data, no text findings; the current images are stripped).
+cutoff c28bab80a9e7d13e8fadd9cfd82fb42d0c63782d
+21a27462818bda583eb915d862f426bcb42b50f4 image-metadata 0 docs/demo/images/01-preflight.png
+21a27462818bda583eb915d862f426bcb42b50f4 image-metadata 0 docs/demo/images/02-ingest.png
+21a27462818bda583eb915d862f426bcb42b50f4 image-metadata 0 docs/demo/images/03-doctor.png
+21a27462818bda583eb915d862f426bcb42b50f4 image-metadata 0 docs/demo/images/04-attack-vulnerable.png
+21a27462818bda583eb915d862f426bcb42b50f4 image-metadata 0 docs/demo/images/05-secure-mode-on.png
+21a27462818bda583eb915d862f426bcb42b50f4 image-metadata 0 docs/demo/images/06-retest-secured.png
+21a27462818bda583eb915d862f426bcb42b50f4 image-metadata 0 docs/demo/images/hero_before-after.png
+227a8d5fd02d33000f7aa7646ac33ad08a3a6b45 dash-character 29 ROADMAP.md
+335dca3ab8ad5e144f1b728e8b8d21e49b6b9da2 dash-character 53 ROADMAP.md
+3b450bf3e5846299d5ce3b6c2e5acf719053027d dash-character 69 ROADMAP.md
+5c277686be74f17276ea270f34ab3d2171588433 dash-character 25 ci/promptfoo/README.md
+b28689f326f679bfad254278b34dc8c266ea5c9b forbidden-domain 12 CLAUDE.md
+b28689f326f679bfad254278b34dc8c266ea5c9b forbidden-domain 13 CLAUDE.md
+b28689f326f679bfad254278b34dc8c266ea5c9b generated-footer 13 CLAUDE.md
+b31b940c89d38b616fb478378927acaefa46067c dash-character 29 ROADMAP.md
+b31b940c89d38b616fb478378927acaefa46067c dash-character 46 ROADMAP.md
+b31b940c89d38b616fb478378927acaefa46067c dash-character 53 ROADMAP.md
+c28bab80a9e7d13e8fadd9cfd82fb42d0c63782d image-metadata 0 docs/images/architecture.png
+e8079eaf315675b39abfdf12c2661ab16a55103d dash-character 18 ROADMAP.md
+e8079eaf315675b39abfdf12c2661ab16a55103d dash-character 29 ROADMAP.md
+e8079eaf315675b39abfdf12c2661ab16a55103d dash-character 41 ROADMAP.md
+e8079eaf315675b39abfdf12c2661ab16a55103d dash-character 46 ROADMAP.md
+e8079eaf315675b39abfdf12c2661ab16a55103d dash-character 52 ROADMAP.md
+e8079eaf315675b39abfdf12c2661ab16a55103d dash-character 59 ROADMAP.md
+e8079eaf315675b39abfdf12c2661ab16a55103d dash-character 65 ROADMAP.md

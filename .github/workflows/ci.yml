@@ -93,10 +93,10 @@ jobs:
 
       # Rules and line length live in pyproject.toml under [tool.ruff].
       - name: Lint
-        run: ruff check --output-format=github src tests ci scripts
+        run: ruff check --output-format=github src tests ci scripts tools
 
       - name: Check formatting
-        run: ruff format --check src tests ci scripts
+        run: ruff format --check src tests ci scripts tools
 
   dependency-audit:
     name: Dependency audit
