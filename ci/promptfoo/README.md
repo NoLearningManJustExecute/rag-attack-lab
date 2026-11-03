@@ -31,7 +31,9 @@ Expected output: 3 passed, 0 failed.
 | `body-parser` | 2.4.0 | Past GHSA-27r3-jxmh-p828 |
 | `node-forge` | 1.4.2 | Past the node-forge advisories fixed in 1.4.1 |
 
-Each one stays inside the range its parent asks for, so none is a major bump. Remove an
+Each one stays inside the range its parent asks for, so no override is a major bump of the
+package it names. `@azure/identity` 4.14.1 itself asks for `@azure/msal-node@^7.1.0`, so its copy moves
+from 6 to 7, the major version promptfoo already used. This harness uses no Azure provider. Remove an
 override once a promptfoo release resolves to that version or later by itself.
 
 ## Known dependency advisories (npm, dev only)
