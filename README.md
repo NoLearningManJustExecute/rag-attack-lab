@@ -22,6 +22,16 @@ See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP
 
 Four attacks against a local `llama3.1:8b`: **4 of 4 succeed** against the vulnerable lab, **0 of 4** after the fixes, with everyday questions still answered correctly. Full step-by-step walkthrough and screenshots: [docs/demo](docs/demo/).
 
+Screen recording: not published yet. The screenshots above are from the walkthrough.
+
+<!-- GIF goes here. Owner: record with a generic shell prompt, no paths, no email in git config on screen, and scrub frames before posting. -->
+
+## Why it matters
+
+RAG connects a model to documents, and none of the attacks here have to break the model. One index holds public and internal documents, so asking for internal details returns them. Anyone who can get a document into the index (a vendor, a shared drive, a scraped page) can steer the answers of everyone whose question retrieves it.
+
+I built this so I could measure the whole loop on something I control: plant the weakness, attack it, fix it, and retest with benign questions in the same run. The result shows which fixes close the hole and which only make it harder, and that difference is what I would want to know before trusting one in a real system.
+
 ## What it does
 
 1. **Ingest:** loads `.txt` and `.pdf` files, splits them into chunks, embeds them with `nomic-embed-text` via Ollama, and stores them in a local Chroma database.
@@ -77,6 +87,8 @@ Four weaknesses are planted on purpose and are on by default (`SECURE_MODE=false
 - **LLM09 Vector and Embedding Weaknesses** (ATLAS AML.T0070 RAG Poisoning): one shared index with no isolation or provenance, and untrusted documents are ingested and presented like trusted ones.
 
 Details, code locations, and what would prevent each one are in [VULNERABILITIES.md](VULNERABILITIES.md). The trust boundaries and assets are in the [threat model](docs/threat-model.md).
+
+**The OWASP Top 10 for Agentic Applications does not apply here.** That list is about systems where a model plans and takes actions through tools. This lab takes a question and returns text: one retrieval and one model call per question, with no tools, no actions, no planning loop and no memory between questions. So I map it to the LLM Top 10 only. The agentic risks are measured in [agent-risk-framework](https://github.com/NoLearningManJustExecute/agent-risk-framework).
 
 Canary values are generated on your machine at ingest time in an obviously fake `RAL-CANARY-...` format and saved to `CANARY_FILE`, which is git-ignored. The committed documents only hold `{{CANARY:...}}` placeholders.
 
@@ -147,9 +159,9 @@ ollama pull nomic-embed-text
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 
-# 3. Install dependencies and the package itself
-pip install -r requirements.txt
-pip install -e .
+# 3. Install the locked dependencies and the package itself
+python -m pip install --require-hashes -r requirements-lock.txt
+python -m pip install --no-deps -e .
 
 # 4. Create your local config
 Copy-Item .env.example .env
@@ -157,6 +169,19 @@ Copy-Item .env.example .env
 
 If PowerShell refuses to run `Activate.ps1`, allow local scripts for your user once:
 `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
+
+## Reproducibility
+
+- **Python:** in the CI jobs that install packages, 3.12.15 on Linux and 3.12.10 on Windows, where no later 3.12 build exists.
+- **Node:** 22.23.4 in CI, for the promptfoo checks only. The lab itself is Python.
+- **Packages:** `requirements-lock.txt` holds every Python package, direct and transitive, at one exact version with sha256 hashes, for Linux and Windows. `requirements.txt` and `requirements-dev.txt` stay the short list of direct pins, and a test fails if the lockfile disagrees with them. `ci/promptfoo/package-lock.json` does the same job for npm. To change a Python pin, edit the requirements file and re-run the command in the lockfile's header with `uv` installed.
+- **Models:** `llama3.1:8b`, digest `46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e`, and `nomic-embed-text`, digest `0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f`, at temperature 0 on a local Ollama. These are the builds on my machine now. The committed findings do not record a digest or an Ollama version, and answers can vary between machines and model builds.
+
+Expected outputs:
+
+- **`python -m pytest`:** all tests pass with no model and no network. CI gets 257 passed.
+- **`npm run eval` in `ci/promptfoo`:** 3 checks passed, 0 failed, with the fake provider.
+- **`rag-lab attack --reingest`, then `rag-lab eval`:** the live verdicts in [Results](#results-before-and-after-the-fixes): 4/4 attacks with `SECURE_MODE` off, 0/4 on, and 8/8 benign answers correct both times. Verdicts are what to compare, not answer text.
 
 ## Configuration
 
@@ -220,12 +245,11 @@ The tests run fully offline. They use a fake chat model and a deterministic bag-
 python -m pytest
 ```
 
-Lint and dependency checks use the tools pinned in `requirements-dev.txt`:
+Lint and dependency checks use the tools pinned in `requirements-dev.txt`, already installed from the lockfile:
 
 ```powershell
-pip install -r requirements-dev.txt
 ruff check src tests ci scripts
-pip-audit -r requirements.txt --ignore-vuln PYSEC-2026-311 --ignore-vuln PYSEC-2026-3813 --ignore-vuln PYSEC-2026-3814 --ignore-vuln PYSEC-2026-3815
+pip-audit -r requirements-lock.txt --require-hashes --disable-pip --ignore-vuln PYSEC-2026-311 --ignore-vuln PYSEC-2026-3813 --ignore-vuln PYSEC-2026-3814 --ignore-vuln PYSEC-2026-3815
 ```
 
 CI runs all three on every push to `main` and every pull request, except changes that touch only docs: tests, lint, and the dependency audit. Tests run on Ubuntu every time, and on Windows for pull requests and a weekly scheduled run. The audit ignores only the four chromadb advisories below; any new advisory fails the build. pip-audit reports "5 ignored" because it lists one of the four twice.
@@ -249,6 +273,16 @@ CI runs all three on every push to `main` and every pull request, except changes
 - The lab never sets `trust_remote_code` and does not use Chroma's built-in embedding functions. Embeddings come from Ollama (or the fake provider) through LangChain.
 
 **Rule:** never run `chroma run` or any Chroma server in this project. The pin stays at 1.5.9 until a patched release ships. Then bump it and remove this section.
+
+## Lessons learned
+
+- **Fix it at retrieval, not in the prompt.** The LLM02 and LLM09 fixes filter on labels set at ingest, so those documents never reach the model. The prompt-side fix for LLM01 still let the injected sentence through 2 of 4 times, with fencing and a separate system message. Text-matching output checks caught the rest, and a reworded or translated attack could get past those.
+- **Read what a passing retest actually measured.** The LLM01 case passes because the newsletter is quarantined and never retrieved, which says nothing about the fencing or the output check. I only learned that fencing alone still leaked 2 of 4 times, and that the output check caught the rest, by bypassing the quarantine and testing those layers on their own.
+- **Measure benign questions in the same run.** A fix that blocks everything also scores 0/4. The 8/8 benign result is what makes the 0/4 mean something.
+- **Planted secrets make a verdict easy.** A canary in an answer is a clear leak. The other detectors match known phrases, which are heuristics, so every finding keeps the model's full answer for a person to read.
+- **Temperature 0 does not promise identical answers.** Answers can vary between machines and model builds, so I compare verdicts, not text. The committed findings also do not record a model digest, which I would now capture on every run.
+- **4 of 4 is not a rate.** I planted the weaknesses and wrote the attacks, on one model. This shows the loop works and which fixes are structural. It does not say how often these attacks work in the wild.
+- **Dependency advisories need a written reason, and the reason goes stale.** chromadb's server advisories do not reach this lab only because it never starts the server, so that became a hard rule. The npm advisory notes in `ci/promptfoo` had drifted out of date within weeks.
 
 ## Project layout
 

@@ -4,7 +4,7 @@
 # The provider (provider.py) runs the pipeline with the fake chat model and the
 # deterministic hashing embeddings, so these checks need no model, no network, and
 # no API keys. They verify that the pipeline retrieves the right document and grounds
-# the prompt in it. Real red-team attack cases are added here from v2.0 onward.
+# the prompt in it. The attack cases live in `rag-lab attack`, not here.
 description: RAG Attack Lab pipeline checks (offline)
 
 providers:

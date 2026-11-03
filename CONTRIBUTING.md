@@ -12,8 +12,8 @@ You need Python 3.12 or newer. The model is optional for most work, because the 
 python -m venv .venv
 # Windows PowerShell: .venv\Scripts\Activate.ps1
 # macOS/Linux:        source .venv/bin/activate
-pip install -r requirements.txt -r requirements-dev.txt
-pip install -e .
+python -m pip install --require-hashes -r requirements-lock.txt
+python -m pip install --no-deps -e .
 git config core.hooksPath .githooks
 ```
 
@@ -30,10 +30,10 @@ python -m pytest                 # offline tests
 ruff check src tests ci scripts tools          # lint
 ruff format --check src tests ci scripts tools # formatting
 python tools/leak_guard.py --all                # personal data, local paths, secrets
-pip-audit -r requirements.txt --ignore-vuln PYSEC-2026-311 --ignore-vuln PYSEC-2026-3813 --ignore-vuln PYSEC-2026-3814 --ignore-vuln PYSEC-2026-3815
+pip-audit -r requirements-lock.txt --require-hashes --disable-pip --ignore-vuln PYSEC-2026-311 --ignore-vuln PYSEC-2026-3813 --ignore-vuln PYSEC-2026-3814 --ignore-vuln PYSEC-2026-3815
 ```
 
-The promptfoo red-team checks also run in CI. To run them locally you need Node 22 or newer:
+The promptfoo red-team checks also run in CI. To run them locally you need Node 22.22 or newer:
 
 ```bash
 cd ci/promptfoo

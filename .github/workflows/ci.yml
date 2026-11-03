@@ -56,18 +56,18 @@ jobs:
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.12"
+          # The newest 3.12 each runner already resolved. Windows has no build past 3.12.10.
+          python-version: ${{ matrix.os == 'windows-latest' && '3.12.10' || '3.12.15' }}
           # Restores pip's download cache, keyed on these files. Packages are still installed each run.
           cache: pip
           cache-dependency-path: |
-            requirements.txt
+            requirements-lock.txt
             pyproject.toml
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          python -m pip install -e .
+          python -m pip install --require-hashes -r requirements-lock.txt
+          python -m pip install --no-deps -e .
 
       # Tests use the fake chat provider and fake embeddings: no model, no network, no secrets.
       - name: Run tests
@@ -84,12 +84,12 @@ jobs:
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.12"
+          python-version: "3.12.15"
           cache: pip
-          cache-dependency-path: requirements-dev.txt
+          cache-dependency-path: requirements-lock.txt
 
       - name: Install ruff
-        run: python -m pip install -r requirements-dev.txt
+        run: python -m pip install --require-hashes -r requirements-lock.txt
 
       # Rules and line length live in pyproject.toml under [tool.ruff].
       - name: Lint
@@ -109,14 +109,14 @@ jobs:
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.12"
+          python-version: "3.12.15"
           cache: pip
-          cache-dependency-path: requirements-dev.txt
+          cache-dependency-path: requirements-lock.txt
 
       - name: Install pip-audit
-        run: python -m pip install -r requirements-dev.txt
+        run: python -m pip install --require-hashes -r requirements-lock.txt
 
-      # Fails on any known vulnerability in requirements.txt, except the four chromadb
+      # Fails on any known vulnerability in the lockfile, except the four chromadb
       # advisories already reviewed in README.md ("Known dependency advisories").
       # They affect the Chroma HTTP server only, which this lab never starts.
       # pip-audit reports "5 ignored" because it lists PYSEC-2026-311 twice.
@@ -126,7 +126,7 @@ jobs:
       #   PYSEC-2026-3815 = CVE-2026-45831 / GHSA-xph7-9rjv-w5fr
       - name: Audit dependencies
         run: |
-          pip-audit -r requirements.txt \
+          pip-audit -r requirements-lock.txt --require-hashes --disable-pip \
             --ignore-vuln PYSEC-2026-311 \
             --ignore-vuln PYSEC-2026-3813 \
             --ignore-vuln PYSEC-2026-3814 \
@@ -143,24 +143,23 @@ jobs:
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.12"
+          python-version: "3.12.15"
           cache: pip
           cache-dependency-path: |
-            requirements.txt
+            requirements-lock.txt
             pyproject.toml
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "22"
+          node-version: "22.23.4"
           # Restores npm's download cache, keyed on the promptfoo lockfile.
           cache: npm
           cache-dependency-path: ci/promptfoo/package-lock.json
 
       - name: Install the package
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          python -m pip install -e .
+          python -m pip install --require-hashes -r requirements-lock.txt
+          python -m pip install --no-deps -e .
 
       - name: Install promptfoo
         working-directory: ci/promptfoo
