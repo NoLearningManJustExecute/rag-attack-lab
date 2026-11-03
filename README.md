@@ -28,7 +28,7 @@ Screen recording: not published yet. The screenshots above are from the walkthro
 
 ## Why it matters
 
-RAG is how a lot of LLM applications get at company data, and the weaknesses here are not exotic. Nobody has to break the model. One index holds public and internal documents, so asking for internal details returns them. Anyone who can get a document into the index (a vendor, a shared drive, a scraped page) can steer the answers of everyone whose question retrieves it.
+RAG connects a model to documents, and none of the attacks here have to break the model. One index holds public and internal documents, so asking for internal details returns them. Anyone who can get a document into the index (a vendor, a shared drive, a scraped page) can steer the answers of everyone whose question retrieves it.
 
 I built this so I could measure the whole loop on something I control: plant the weakness, attack it, fix it, and retest with benign questions in the same run. The result shows which fixes close the hole and which only make it harder, and that difference is what I would want to know before trusting one in a real system.
 
@@ -277,10 +277,10 @@ CI runs all three on every push to `main` and every pull request, except changes
 ## Lessons learned
 
 - **Fix it at retrieval, not in the prompt.** The LLM02 and LLM09 fixes filter on labels set at ingest, so those documents never reach the model. The prompt-side fix for LLM01 still let the injected sentence through 2 of 4 times, with fencing and a separate system message. Text-matching output checks caught the rest, and a reworded or translated attack could get past those.
-- **Read what a passing retest actually measured.** The LLM01 case passes because the newsletter is quarantined and never retrieved, which says nothing about the fencing or the output check. I only learned how weak those layers were by bypassing the quarantine and testing them on their own.
+- **Read what a passing retest actually measured.** The LLM01 case passes because the newsletter is quarantined and never retrieved, which says nothing about the fencing or the output check. I only learned that fencing alone still leaked 2 of 4 times, and that the output check caught the rest, by bypassing the quarantine and testing those layers on their own.
 - **Measure benign questions in the same run.** A fix that blocks everything also scores 0/4. The 8/8 benign result is what makes the 0/4 mean something.
 - **Planted secrets make a verdict easy.** A canary in an answer is a clear leak. The other detectors match known phrases, which are heuristics, so every finding keeps the model's full answer for a person to read.
-- **Temperature 0 is not determinism.** Answers still vary between machines and model builds, so I compare verdicts, not text. The committed findings also do not record a model digest, which I would now capture on every run.
+- **Temperature 0 does not promise identical answers.** Answers can vary between machines and model builds, so I compare verdicts, not text. The committed findings also do not record a model digest, which I would now capture on every run.
 - **4 of 4 is not a rate.** I planted the weaknesses and wrote the attacks, on one model. This shows the loop works and which fixes are structural. It does not say how often these attacks work in the wild.
 - **Dependency advisories need a written reason, and the reason goes stale.** chromadb's server advisories do not reach this lab only because it never starts the server, so that became a hard rule. The npm advisory notes in `ci/promptfoo` had drifted out of date within weeks.
 
