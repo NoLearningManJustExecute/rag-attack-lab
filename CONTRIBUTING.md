@@ -12,8 +12,8 @@ You need Python 3.12 or newer. The model is optional for most work, because the 
 python -m venv .venv
 # Windows PowerShell: .venv\Scripts\Activate.ps1
 # macOS/Linux:        source .venv/bin/activate
-pip install -r requirements.txt -r requirements-dev.txt
-pip install -e .
+python -m pip install --require-hashes -r requirements-lock.txt
+python -m pip install --no-deps -e .
 git config core.hooksPath .githooks
 ```
 
