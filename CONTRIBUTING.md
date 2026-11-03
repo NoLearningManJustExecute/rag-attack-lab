@@ -33,7 +33,7 @@ python tools/leak_guard.py --all                # personal data, local paths, se
 pip-audit -r requirements-lock.txt --require-hashes --disable-pip --ignore-vuln PYSEC-2026-311 --ignore-vuln PYSEC-2026-3813 --ignore-vuln PYSEC-2026-3814 --ignore-vuln PYSEC-2026-3815
 ```
 
-The promptfoo red-team checks also run in CI. To run them locally you need Node 22 or newer:
+The promptfoo red-team checks also run in CI. To run them locally you need Node 22.22 or newer:
 
 ```bash
 cd ci/promptfoo
