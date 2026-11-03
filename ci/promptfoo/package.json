@@ -6,6 +6,11 @@
     "eval": "promptfoo eval -c promptfooconfig.yaml --no-cache -j 1"
   },
   "devDependencies": {
-    "promptfoo": "0.124.1"
+    "promptfoo": "0.125.1"
+  },
+  "overrides": {
+    "@azure/identity": "4.14.1",
+    "body-parser": "2.4.0",
+    "node-forge": "1.4.2"
   }
 }
