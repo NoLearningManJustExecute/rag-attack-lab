@@ -10,6 +10,8 @@
 
 Live demo: https://NoLearningManJustExecute.github.io/rag-attack-lab/
 
+One of three projects: this repo attacks, [agent-risk-framework](https://github.com/NoLearningManJustExecute/agent-risk-framework) defends, [agent-detection-gauntlet](https://github.com/NoLearningManJustExecute/agent-detection-gauntlet) detects.
+
 See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP.md](ROADMAP.md) for project phases, [CONTRIBUTING.md](CONTRIBUTING.md) to get set up, and [SECURITY.md](SECURITY.md) for the security policy.
 
 [![CI](https://github.com/NoLearningManJustExecute/rag-attack-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/NoLearningManJustExecute/rag-attack-lab/actions/workflows/ci.yml)
@@ -67,7 +69,7 @@ flowchart TD
 
 ## Deliberately planted vulnerabilities
 
-Four weaknesses are planted on purpose and are on by default (`SECURE_MODE=false`). Each is mapped to the OWASP Top 10 for LLM Applications (2026) and MITRE ATLAS, and tagged in the code with a `# LLM0x:` comment.
+Four weaknesses are planted on purpose and are on by default (`SECURE_MODE=false`). Each is mapped to the OWASP Top 10 for LLM Applications (2026) and MITRE ATLAS, and tagged in the code with a `# LLM0x:` comment. ATLAS IDs are as of release v2026.09; release v2026.10 moved AML.T0056 to AML.T0085.003 and AML.T0057 to AML.T0085.002.
 
 - **LLM01 Prompt Injection** (ATLAS AML.T0051, .000 Direct and .001 Indirect): the question and retrieved document text are pasted into the prompt with no separation of instructions from data.
 - **LLM02 Sensitive Information Disclosure** (ATLAS AML.T0057 LLM Data Leakage): internal documents with canary secrets share the index with public ones, and retrieval has no access control.
@@ -118,7 +120,7 @@ rag-lab eval
 
 Model answers can vary between machines and model builds, even at temperature 0. The verdicts above are from the committed run.
 
-To test the LLM01 layers on their own (quarantine bypassed, so the newsletter reaches the model), run `python scripts\llm01_layers.py`. It writes `findings\llm01-layers.json`; the committed run found the injected sentence in 4 of 4 answers with the original prompt, 2 of 4 with fencing alone, and 0 of 4 with fencing plus the output check.
+To test the LLM01 layers on their own (quarantine bypassed, so the newsletter reaches the model), run `python scripts\llm01_layers.py`. It writes `findings\llm01-layers.json`; the committed run found the injected sentence in 4 of 4 answers with the original prompt, 2 of 4 with fencing plus a separate system message, and 0 of 4 with fencing plus the output check.
 
 ### Two-minute demo
 

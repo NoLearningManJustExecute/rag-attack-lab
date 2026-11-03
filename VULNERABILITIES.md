@@ -39,7 +39,7 @@ For the system description, trust boundaries, and assets, see the [threat model]
   not checked, and retrieved text is pasted in verbatim with only a `[Source: ...]` label in front of it.
 - **What would prevent it:** keep instructions in a separate system message, wrap untrusted text in clearly delimited
   data blocks, screen inputs and retrieved text for instruction-like content, and check outputs before returning them.
-- **How v2 will exercise it:** ask questions, and ingest documents, that try to override the instructions, and record
+- **How v2 exercises it:** ask questions, and ingest documents, that try to override the instructions, and record
   whether the answer follows them.
 
 ## LLM02 Sensitive Information Disclosure
@@ -59,7 +59,7 @@ For the system description, trust boundaries, and assets, see the [threat model]
   an internal document pulls it, canaries included, into the prompt.
 - **What would prevent it:** keep secrets out of the corpus entirely, label documents by sensitivity, filter retrieval
   by the caller's permissions, and scan answers for secrets before returning them.
-- **How v2 will exercise it:** ask ordinary-sounding questions and check whether any `RAL-CANARY-` value from
+- **How v2 exercises it:** ask ordinary-sounding questions and check whether any `RAL-CANARY-` value from
   `CANARY_FILE` appears in the retrieved context or the answer.
 
 ## LLM08 Hidden Context Exposure
@@ -74,7 +74,7 @@ For the system description, trust boundaries, and assets, see the [threat model]
   exposed.
 - **What would prevent it:** treat the system prompt as public and keep nothing sensitive in it, send it as a separate
   system message, and filter answers that echo it or the hidden context.
-- **How v2 will exercise it:** ask the assistant to describe or repeat its instructions and its context, and compare the
+- **How v2 exercises it:** ask the assistant to describe or repeat its instructions and its context, and compare the
   answer with `PROMPT_TEMPLATE`.
 
 ## LLM09 Vector and Embedding Weaknesses
@@ -97,7 +97,7 @@ For the system description, trust boundaries, and assets, see the [threat model]
 - **What would prevent it:** only ingest from vetted sources, record provenance and trust level in metadata, check
   documents for suspicious content before they are indexed, separate collections by tenant and sensitivity, and be able
   to purge and rebuild the index.
-- **How v2 will exercise it:** ingest a document that contradicts a trusted one, ask about that topic, and record which
+- **How v2 exercises it:** ingest a document that contradicts a trusted one, ask about that topic, and record which
   version the answer follows.
 
 ## Fixes (v3.0, SECURE_MODE)

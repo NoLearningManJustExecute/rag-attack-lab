@@ -119,6 +119,7 @@ jobs:
       # Fails on any known vulnerability in requirements.txt, except the four chromadb
       # advisories already reviewed in README.md ("Known dependency advisories").
       # They affect the Chroma HTTP server only, which this lab never starts.
+      # pip-audit reports "5 ignored" because it lists PYSEC-2026-311 twice.
       #   PYSEC-2026-311  = CVE-2026-45829 / GHSA-f4j7-r4q5-qw2c
       #   PYSEC-2026-3813 = CVE-2026-45830 / GHSA-2wm9-hf6c-p5cr
       #   PYSEC-2026-3814 = CVE-2026-45833 / GHSA-36p7-vc44-83pf
