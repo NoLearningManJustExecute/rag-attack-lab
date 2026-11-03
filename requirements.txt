@@ -1,4 +1,4 @@
-# Versions pinned from `pip list` on 2026-10-21 (Python 3.12.10); pypdf bumped to 6.21.4 on 2026-11-02.
+# Versions pinned from `pip list` on 2026-10-21 (Python 3.12.10); pypdf bumped to 6.21.4 on 2026-11-02; langchain-core, langchain-anthropic and pytest bumped on 2026-11-03.
 langchain-core==1.7.3
 langchain-text-splitters==1.1.3
 langchain-chroma==1.1.0
