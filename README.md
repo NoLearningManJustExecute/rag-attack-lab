@@ -265,6 +265,8 @@ CI runs all three on every push to `main` and every pull request, except changes
 | CVE-2026-45830 | GHSA-2wm9-hf6c-p5cr | High | Any authenticated user can read or change any tenant's collections |
 | CVE-2026-45831 | GHSA-xph7-9rjv-w5fr | High | `SimpleRBACAuthorizationProvider` ignores tenant, database, and collection scope |
 
+The per-advisory triage, with how each one was checked, is in [SECURITY.md](SECURITY.md#supply-chain-dependencies).
+
 **Affected component:** the Chroma HTTP server (its `/api/v2` endpoints and auth providers).
 
 **Why this lab is not exposed:**
