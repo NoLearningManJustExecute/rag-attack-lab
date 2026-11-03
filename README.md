@@ -22,9 +22,9 @@ See [docs/OVERVIEW.md](docs/OVERVIEW.md) for the full project overview, [ROADMAP
 
 Four attacks against a local `llama3.1:8b`: **4 of 4 succeed** against the vulnerable lab, **0 of 4** after the fixes, with everyday questions still answered correctly. Full step-by-step walkthrough and screenshots: [docs/demo](docs/demo/).
 
-Screen recording: not published yet. The screenshots above are from the walkthrough.
+![Recording: the model's answer repeats the newsletter's injected sentence, the layer test prints 4/4, 2/4 and 0/4, and with SECURE_MODE on the same question gets "I don't know."](docs/assets/demo.gif)
 
-<!-- GIF goes here. Owner: record with a generic shell prompt, no paths, no email in git config on screen, and scrub frames before posting. -->
+A live run against a local `llama3.1:8b`. With `SECURE_MODE` off, an ordinary question about the vendor newsletter (the harness's LLM01 case) retrieves it, and the model's answer repeats its injected sentence. The layer test bypasses the quarantine by retrieving with `SECURE_MODE` off, over four questions in one run: the sentence appears in **4 of 4** answers with the original prompt, **2 of 4** with fencing plus a separate system message, and **0 of 4** once the output check is added. That check removes this exact sentence, so a reworded one could get past it. With `SECURE_MODE` on, the quarantine filters the newsletter out of retrieval and the same question gets "I don't know." Tape: [docs/assets/demo.tape](docs/assets/demo.tape).
 
 ## Why it matters
 
