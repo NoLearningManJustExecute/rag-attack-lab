@@ -243,7 +243,8 @@
   .badge small { display: inline-block; width: 100%; font-size: 10px; font-weight: 500; letter-spacing: .5px; opacity: .85; margin-top: 2px; }
   /* resting state is the final state: exploited (struck) then fixed */
   .frow .badge.x { text-decoration: line-through; }
-  .frow .ev .b { opacity: .9; }
+  .frow .badge.x small { opacity: 1; }
+  .frow .ev .b .v { opacity: .9; }
   /* before state, set by script while animating */
   .board.before .frow:not(.flipped) .badge.x { opacity: 1; text-decoration: none; transform: scale(1.02); }
   .board.before .frow:not(.flipped) .badge.f { opacity: .12; transform: translateY(6px); filter: saturate(0); }
