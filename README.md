@@ -160,7 +160,7 @@ If PowerShell refuses to run `Activate.ps1`, allow local scripts for your user o
 
 ## Reproducibility
 
-- **Python:** 3.12.15 in CI on Linux, 3.12.10 on Windows, where no later 3.12 build exists.
+- **Python:** in the CI jobs that install packages, 3.12.15 on Linux and 3.12.10 on Windows, where no later 3.12 build exists.
 - **Node:** 22.23.4 in CI, for the promptfoo checks only. The lab itself is Python.
 - **Packages:** `requirements-lock.txt` holds every Python package, direct and transitive, at one exact version with sha256 hashes, for Linux and Windows. `requirements.txt` and `requirements-dev.txt` stay the short list of direct pins, and a test fails if the lockfile disagrees with them. `ci/promptfoo/package-lock.json` does the same job for npm. To change a Python pin, edit the requirements file and re-run the command in the lockfile's header with `uv` installed.
 - **Models:** `llama3.1:8b`, digest `46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e`, and `nomic-embed-text`, digest `0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f`, at temperature 0 on a local Ollama. These are the builds on my machine now. The committed findings do not record a digest or an Ollama version, and answers can vary between machines and model builds.
